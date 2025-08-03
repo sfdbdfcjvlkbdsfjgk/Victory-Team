@@ -148,7 +148,7 @@ body {
   background-color: #e9eef3;
   color: #333;
   text-align: center;
-  line-height: calc(100vh - 60px);
+  /* line-height: calc(100vh - 60px); */
   padding: 0;
 }
 
