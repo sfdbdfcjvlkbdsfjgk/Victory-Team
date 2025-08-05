@@ -1,0 +1,648 @@
+.video-call-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  /* 调整：优化整体布局，让视频区域更紧凑 */
+  justify-content: flex-start;
+  padding-top: 10px;
+}
+
+.video-grid {
+  display: grid;
+  /* 修改：从左右并排改为上下排列 */
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 20px;
+  flex: 1;
+  margin-bottom: 20px;
+  /* 调整：减小视频网格的高度 */
+  min-height: 300px;
+  max-height: 50vh;
+}
+
+.video-container {
+  position: relative;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  /* 调整：减小视频容器的最小高度 */
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  /* 竖屏布局：调整宽高比 */
+  aspect-ratio: 16/9;
+}
+
+.video-element {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: #000;
+  /* 调整：减小视频元素的最小高度 */
+  min-height: 150px;
+}
+
+/* 主播状态提示样式 */
+.host-status-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 12px;
+}
+
+.host-status-message {
+  text-align: center;
+  color: white;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.status-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0;
+  font-size: 18px;
+}
+
+.status-icon {
+  font-size: 24px;
+}
+
+.status-text {
+  font-weight: 500;
+}
+
+/* 确保远程视频容器正确显示 */
+.video-container video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: #000;
+}
+
+.video-overlay {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+/* 摄像头占位符样式 */
+.video-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: #fff;
+  text-align: center;
+}
+
+.placeholder-icon {
+  font-size: 48px;
+  margin-bottom: 10px;
+  opacity: 0.8;
+  color: #8b5cf6;
+}
+
+.placeholder-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.control-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.control-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.control-button.primary {
+  background: #4CAF50;
+  color: white;
+}
+
+.control-button.danger {
+  background: #f44336;
+  color: white;
+}
+
+.control-button.secondary {
+  background: #2196F3;
+  color: white;
+}
+
+.control-button.muted {
+  background: #ff9800;
+  color: white;
+}
+
+.control-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.status-dot.connected {
+  background: #4CAF50;
+}
+
+.status-dot.connecting {
+  background: #ff9800;
+}
+
+.status-dot.disconnected {
+  background: #f44336;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.room-input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.room-input input {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.room-input button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: #4CAF50;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s ease;
+}
+
+.room-input button:hover {
+  background: #45a049;
+}
+
+.error-message {
+  background: #f44336;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 18px;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .video-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .controls {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .control-button {
+    width: 50px;
+    height: 50px;
+    font-size: 16px;
+  }
+}
+
+/* 横屏布局优化 */
+@media (orientation: landscape) {
+  .video-grid {
+    max-height: 70vh;
+    aspect-ratio: 16/9;
+  }
+  
+  .video-container {
+    aspect-ratio: 16/9;
+  }
+}
+
+/* 聊天面板样式 */
+.chat-panel {
+  position: fixed;
+  right: 20px;
+  bottom: 100px;
+  width: 300px;
+  height: 400px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px 12px 0 0;
+}
+
+.chat-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chat-message {
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 80%;
+}
+
+.chat-message.own {
+  align-self: flex-end;
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.chat-message.other {
+  align-self: flex-start;
+  background: #f5f5f5;
+  color: #333;
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+
+.username {
+  font-weight: bold;
+}
+
+.timestamp {
+  opacity: 0.7;
+}
+
+.message-content {
+  word-wrap: break-word;
+}
+
+.chat-input {
+  display: flex;
+  padding: 15px;
+  gap: 10px;
+  border-top: 1px solid #eee;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  outline: none;
+}
+
+.chat-input input:focus {
+  border-color: #667eea;
+}
+
+.chat-input button {
+  padding: 10px 15px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.chat-input button:hover {
+  background: #5a6fd8;
+}
+
+.control-button.active {
+  background: #ff9800;
+  color: white;
+}
+
+/* 连麦相关样式 */
+.control-button.primary {
+  background: #4CAF50;
+  color: white;
+}
+
+.control-button.primary:hover {
+  background: #45a049;
+}
+
+.control-button.requesting {
+  background: #ff9800;
+  color: white;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* 连麦请求管理面板 */
+.mic-requests-panel {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-width: 280px;
+  max-width: 350px;
+  z-index: 1000;
+}
+
+.panel-header h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.request-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.requester-name {
+  font-weight: 500;
+  color: #333;
+  flex: 1;
+}
+
+.request-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.approve-btn, .deny-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.approve-btn {
+  background: #4CAF50;
+  color: white;
+}
+
+.approve-btn:hover {
+  background: #45a049;
+  transform: translateY(-1px);
+}
+
+.deny-btn {
+  background: #f44336;
+  color: white;
+}
+
+.deny-btn:hover {
+  background: #da190b;
+  transform: translateY(-1px);
+}
+
+/* 表情包面板样式 */
+.emoji-panel {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* 隐藏表情包分类标题和预览区域 */
+.emoji-panel .epr-category-label,
+.emoji-panel .epr-preview,
+.emoji-panel .epr-emoji-category-label,
+.emoji-panel [class*="category-label"],
+.emoji-panel [class*="CategoryLabel"],
+.emoji-panel .epr-emoji-category > div:first-child {
+  display: none !important;
+}
+
+/* 让表情包区域占用更多空间 */
+.emoji-panel .epr-body {
+  padding-top: 0 !important;
+}
+
+.emoji-panel .epr-emoji-list {
+  padding-top: 5px !important;
+}
+
+.emoji-panel .epr-emoji-category {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* 隐藏任何可能的标题文字 */
+.emoji-panel .epr-emoji-category h3,
+.emoji-panel .epr-emoji-category h4,
+.emoji-panel .epr-emoji-category .epr-icn-category + span,
+.emoji-panel .epr-emoji-category span[class*="Label"] {
+  display: none !important;
+}
+
+.emoji-toggle-btn {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.emoji-toggle-btn:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.emoji-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+/* 调整聊天输入框布局 */
+.chat-input {
+  display: flex;
+  padding: 15px;
+  gap: 8px;
+  border-top: 1px solid #eee;
+  align-items: flex-end;
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+  .chat-panel {
+    width: calc(100vw - 40px);
+    right: 20px;
+    left: 20px;
+    bottom: 120px;
+  }
+  
+  .emoji-panel {
+    max-width: 100%;
+  }
+  
+  /* 移动端表情包选择器调整 */
+  .emoji-panel .EmojiPickerReact {
+    width: 100% !important;
+    max-width: 320px !important;
+    height: 420px !important;
+  }
+}
+
+/* 平板设备优化 */
+@media (max-width: 768px) and (min-width: 481px) {
+  .emoji-panel .EmojiPickerReact {
+    width: 340px !important;
+    height: 450px !important;
+  }
+} 
