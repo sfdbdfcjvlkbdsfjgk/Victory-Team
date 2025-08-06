@@ -1,7 +1,6 @@
 <template>
   <div class="banner-sort">
-    <h2>排序banner位</h2>
-    <p>这里是排序banner位的页面问问内容</p>
+  顶顶顶顶顶顶顶顶顶顶顶
   </div>
 </template>
 
