@@ -1,7 +1,6 @@
 <template>
   <div class="activity-management">
-<<<<<<< HEAD
-<<<<<<< HEAD
+
     <!-- 搜索筛选区域 -->
     <div class="search-section">
       <div class="search-row">
@@ -227,26 +226,6 @@
         @current-change="handleCurrentChange"
       />
     </div>
-=======
-    <h2>活动管理</h2>
-    <div class="activity-content">
-      <p>这里是活动管理的主页面内容</p>
-      <div class="activity-actions">
-        <el-button type="primary" @click="goToCreate">新增活动</el-button>
-        <el-button type="success" @click="goToRegistration">报名信息查看</el-button>
-      </div>
-    </div>
->>>>>>> 3abb24d5754c542619de2d8b3b17f9e829702c0e
-=======
-    <h2>活动管理</h2>
-    <div class="activity-content">
-      <p>这里是活动管理的主页面内容</p>
-      <div class="activity-actions">
-        <el-button type="primary" @click="goToCreate">新增活动</el-button>
-        <el-button type="success" @click="goToRegistration">报名信息查看</el-button>
-      </div>
-    </div>
->>>>>>> 3abb24d5754c542619de2d8b3b17f9e829702c0e
   </div>
 
   <!-- 编辑活动对话框 -->
@@ -296,8 +275,6 @@
 </template>
 
 <script setup lang="ts">
-<<<<<<< HEAD
-<<<<<<< HEAD
 import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -446,18 +423,11 @@ const getActivityStatusType = (status: string) => {
 // };
 
 // 操作方法
-=======
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
 
->>>>>>> 3abb24d5754c542619de2d8b3b17f9e829702c0e
-=======
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
 
->>>>>>> 3abb24d5754c542619de2d8b3b17f9e829702c0e
+
 const goToCreate = () => {
   router.push("/dashboard/activity/create");
 };
@@ -495,8 +465,6 @@ const editActivity = (row: any) => {
   editDialogVisible.value = true
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 // 保存编辑
 const saveEdit = async () => {
   try {
@@ -754,16 +722,10 @@ const handleOffline = async (row: any) => {
     // 用户取消操作
   }
 };
-=======
+
 const goToRegistration = () => {
   router.push('/dashboard/activity/registration')
 }
->>>>>>> 3abb24d5754c542619de2d8b3b17f9e829702c0e
-=======
-const goToRegistration = () => {
-  router.push('/dashboard/activity/registration')
-}
->>>>>>> 3abb24d5754c542619de2d8b3b17f9e829702c0e
 </script>
 
 <style scoped>
@@ -771,15 +733,42 @@ const goToRegistration = () => {
   padding: 20px;
 }
 
-.activity-content {
-  margin-top: 20px;
+.search-section {
+  background: #f5f5f5;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
 }
 
-.activity-actions {
-  margin-top: 20px;
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
-.activity-actions .el-button {
-  margin-right: 10px;
+.search-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-item label {
+  font-size: 14px;
+  color: #606266;
+  white-space: nowrap;
+}
+
+.action-section {
+  margin-bottom: 20px;
+}
+
+.table-section {
+  margin-bottom: 20px;
+}
+
+.pagination-section {
+  display: flex;
+  justify-content: center;
 }
 </style>
