@@ -82,7 +82,7 @@
 import { computed, defineEmits, defineProps, withDefaults } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Plus, Close, Document } from '@element-plus/icons-vue';
-import { useChunkUploadV2 } from '../composables/useChunkUploadV2';
+import { useChunkUploadSimple } from '../composables/useChunkUploadSimple';
 
 interface Props {
   modelValue: string;
@@ -110,8 +110,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>();
 
-// 使用分片上传功能
-const chunkUpload = useChunkUploadV2();
+// 使用简化分片上传功能
+const chunkUpload = useChunkUploadSimple();
 
 // 计算最大文件大小显示文本
 const maxSizeText = computed(() => {
@@ -175,26 +175,49 @@ const handleFileChange = async (file: any) => {
   }
 
   try {
-    // 使用分片上传
+    console.log(`🚀 开始上传文件: ${rawFile.name} (${(rawFile.size / 1024 / 1024).toFixed(2)}MB)`);
+    
+    // 使用简化分片上传
     const result = await chunkUpload.uploadLargeFile(
       rawFile,
       (progress, status) => {
         emit('upload-progress', progress);
-        console.log(`上传进度: ${progress}%, 状态: ${status}`);
-      },
-      undefined,
-      props.uploadMode
+        console.log(`📊 上传进度: ${progress}%, 状态: ${status}`);
+      }
     );
     
     if (result) {
       emit('update:modelValue', result.url);
       emit('upload-success', result);
-      ElMessage.success("文件上传成功");
+      ElMessage.success(`${rawFile.type.startsWith('video/') ? '视频' : '文件'}上传成功`);
+      console.log(`✅ 上传成功: ${result.url}`);
+    } else {
+      throw new Error('上传返回结果为空');
     }
-  } catch (error) {
-    console.error("文件上传失败:", error);
+  } catch (error: any) {
+    console.error("❌ 文件上传失败:", error);
+    
+    // 根据错误类型提供不同的提示
+    let errorMessage = "文件上传失败";
+    if (error.message?.includes('btoa') || error.message?.includes('Latin1')) {
+      errorMessage = "文件名包含特殊字符，上传失败。请尝试重命名文件为英文名称";
+    } else if (error.message?.includes('network') || error.message?.includes('500')) {
+      errorMessage = "网络错误，请检查网络连接后重试";
+    } else if (error.message?.includes('timeout')) {
+      errorMessage = "上传超时，请尝试选择较小的文件或稍后重试";
+    } else if (error.message?.includes('分片')) {
+      errorMessage = "分片上传失败，请重新尝试";
+    } else if (error.message?.includes('InvalidCharacterError')) {
+      errorMessage = "文件信息包含无效字符，请重新选择文件";
+    } else if (error.message) {
+      errorMessage = `上传失败: ${error.message}`;
+    }
+    
     emit('upload-error', error);
-    ElMessage.error("文件上传失败");
+    ElMessage.error(errorMessage);
+    
+    // 重置上传状态
+    chunkUpload.cleanup?.();
   }
 
   return false; // 阻止自动上传

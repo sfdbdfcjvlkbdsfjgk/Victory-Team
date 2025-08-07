@@ -29,11 +29,9 @@ import {
   ReloadOutlined
 } from '@ant-design/icons';
 import {
-  mockTodaySports,
-  mockWeather,
-  mockSportsStats,
   getRandomQuote
 } from '../data/mockSportsData';
+import { api } from '../services/api';
 import type { SportsData, WeatherData, SportStats } from '../api/types';
 import './Sports.css';
 
@@ -43,68 +41,89 @@ const { Header, Content } = Layout;
 const SportsPage: React.FC = () => {
   const navigate = useNavigate();
   
-  // 状态管理 - 直接使用默认数据
-  const [weather, setWeather] = useState<WeatherData | null>(mockWeather);
-  const [todaySports, setTodaySports] = useState<SportsData | null>(mockTodaySports);
-  const [sportsStats, setSportsStats] = useState<SportStats | null>(mockSportsStats);
-  const [loading, setLoading] = useState(false);
+  // 状态管理
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [todaySports, setTodaySports] = useState<SportsData | null>(null);
+  const [sportsStats, setSportsStats] = useState<SportStats | null>(null);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [motivationalText, setMotivationalText] = useState<string>(getRandomQuote());
 
   // 计算进度百分比
   const progressPercent = todaySports ? Math.round((todaySports.steps / todaySports.goal) * 100) : 0;
 
-  // 页面初始化时数据已经加载完成，无需额外加载
+  // 页面初始化时加载数据
   useEffect(() => {
-    console.log('🏃 全民健身页面已加载，数据已就绪');
+    loadSportsData();
   }, []);
+
+  // 加载运动数据
+  const loadSportsData = async () => {
+    try {
+      setLoading(true);
+      const [todayRes, weatherRes, statsRes] = await Promise.all([
+        api.sports.getTodaySports(),
+        api.sports.getCurrentWeather(),
+        api.sports.getSportsStats()
+      ]);
+
+      if (todayRes.success) {
+        setTodaySports(todayRes.data);
+      }
+      if (weatherRes.success) {
+        setWeather(weatherRes.data);
+      }
+      if (statsRes.success) {
+        setSportsStats(statsRes.data);
+      }
+    } catch (error) {
+      console.error('加载运动数据失败:', error);
+      // 降级到模拟数据
+      const { mockTodaySports, mockWeather, mockSportsStats } = await import('../data/mockSportsData');
+      setTodaySports(mockTodaySports);
+      setWeather(mockWeather);
+      setSportsStats(mockSportsStats);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // 刷新数据
   const refreshData = async () => {
     try {
       setRefreshing(true);
       
-      // 模拟刷新延迟
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // 使用API刷新运动数据
+      const refreshRes = await api.sports.refreshSportsData({
+        currentSteps: todaySports?.steps,
+        currentDistance: todaySports?.distance,
+        currentCalories: todaySports?.calories
+      });
+
+      if (refreshRes.success) {
+        const updatedSports = {
+          ...todaySports!,
+          ...refreshRes.data
+        };
+        setTodaySports(updatedSports);
+        
+        // 计算增加的数据用于提示
+        const addedSteps = refreshRes.data.steps - (todaySports?.steps || 0);
+        const addedDistance = Math.round((refreshRes.data.distance - (todaySports?.distance || 0)) * 100) / 100;
+        const addedCalories = refreshRes.data.calories - (todaySports?.calories || 0);
+        
+        message.success(`数据已更新！+${addedSteps}步，+${addedDistance}km，+${addedCalories}卡路里`);
+      }
+
+      // 重新获取天气数据
+      const weatherRes = await api.sports.getCurrentWeather();
+      if (weatherRes.success) {
+        setWeather(weatherRes.data);
+      }
       
-      // 随机增加运动数据
-      const currentSteps = todaySports?.steps || 0;
-      const currentDistance = todaySports?.distance || 0;
-      const currentCalories = todaySports?.calories || 0;
-      
-      const addedSteps = Math.floor(Math.random() * 500) + 200; // 每次增加200-700步
-      const addedDistance = Math.round((Math.random() * 0.5 + 0.2) * 100) / 100; // 增加0.2-0.7km
-      const addedCalories = Math.floor(Math.random() * 50) + 30; // 增加30-80卡路里
-      
-      const newSteps = currentSteps + addedSteps;
-      const newDistance = Math.round((currentDistance + addedDistance) * 100) / 100;
-      const newCalories = currentCalories + addedCalories;
-      
-      const updatedSports: SportsData = {
-        ...mockTodaySports,
-        steps: newSteps,
-        distance: newDistance,
-        calories: newCalories,
-        activeMinutes: (todaySports?.activeMinutes || 0) + Math.floor(Math.random() * 15) + 10 // 增加10-25分钟
-      };
-      
-      // 随机更新天气
-      const temperatures = [25, 26, 27, 28, 29, 30, 31, 32];
-      const conditions = ['晴', '多云', '晴朗', '微风'];
-      const randomTemp = temperatures[Math.floor(Math.random() * temperatures.length)];
-      const randomCondition = conditions[Math.floor(Math.random() * conditions.length)];
-      
-      const updatedWeather: WeatherData = {
-        ...mockWeather,
-        temperature: randomTemp,
-        condition: randomCondition
-      };
-      
-      setTodaySports(updatedSports);
-      setWeather(updatedWeather);
       setMotivationalText(getRandomQuote());
-      message.success(`数据已更新！+${addedSteps}步，+${addedDistance}km，+${addedCalories}卡路里`);
     } catch (error) {
+      console.error('刷新数据失败:', error);
       message.error('刷新失败');
     } finally {
       setRefreshing(false);
@@ -127,7 +146,7 @@ const SportsPage: React.FC = () => {
       const addedMinutes = 30; // 30分钟活跃时间
       
       const updatedSports: SportsData = {
-        ...mockTodaySports,
+        ...todaySports!,
         steps: currentSteps + addedSteps,
         distance: Math.round((currentDistance + addedDistance) * 100) / 100,
         calories: currentCalories + addedCalories,
@@ -225,6 +244,24 @@ const SportsPage: React.FC = () => {
                   }
                 </Text>
                 
+                {/* 智能运动建议 */}
+                <div style={{ 
+                  marginTop: 8, 
+                  padding: '8px 12px',
+                  background: 'rgba(255,255,255,0.15)',
+                  borderRadius: 8,
+                  backdropFilter: 'blur(10px)'
+                }}>
+                  <Text style={{ color: 'white', fontSize: 12 }}>
+                    💡 {weather?.temperature && weather.temperature > 25 
+                      ? '天气较热，建议选择室内运动或傍晚时段锻炼'
+                      : weather?.temperature && weather.temperature < 10
+                      ? '天气较冷，运动前请充分热身，注意保暖'
+                      : '天气不错，适合户外运动！推荐跑步或骑行'
+                    }
+                  </Text>
+                </div>
+                
                 <Flex justify="flex-end">
                   <Button 
                     type="text" 
@@ -260,6 +297,67 @@ const SportsPage: React.FC = () => {
               </Text>
             </Card>
 
+            {/* 成就徽章系统 */}
+            <Card 
+              className="animate__animated animate__fadeInUp achievement-card"
+              style={{ 
+                animationDelay: '0.25s',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                border: 'none',
+                color: 'white'
+              }}
+              styles={{ body: { padding: 16 } }}
+            >
+              <Flex justify="space-between" align="center">
+                <div>
+                  <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 14 }}>
+                    今日成就
+                  </Text>
+                  <div style={{ marginTop: 4 }}>
+                    {/* 动态徽章显示 */}
+                    {(todaySports?.steps || 0) >= 5000 && (
+                      <Badge 
+                        count="🚶‍♂️ 步行达人" 
+                        style={{ 
+                          backgroundColor: 'rgba(255,255,255,0.2)', 
+                          color: 'white',
+                          fontSize: 12,
+                          marginRight: 8
+                        }} 
+                      />
+                    )}
+                    {(todaySports?.distance || 0) >= 3 && (
+                      <Badge 
+                        count="🏃‍♂️ 长跑健将" 
+                        style={{ 
+                          backgroundColor: 'rgba(255,255,255,0.2)', 
+                          color: 'white',
+                          fontSize: 12,
+                          marginRight: 8
+                        }} 
+                      />
+                    )}
+                    {progressPercent >= 100 && (
+                      <Badge 
+                        count="🎯 目标达成" 
+                        style={{ 
+                          backgroundColor: 'rgba(255,255,255,0.2)', 
+                          color: 'white',
+                          fontSize: 12
+                        }} 
+                      />
+                    )}
+                    {(todaySports?.steps || 0) === 0 && (
+                      <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>
+                        开始运动，解锁成就！
+                      </Text>
+                    )}
+                  </div>
+                </div>
+                <TrophyOutlined style={{ fontSize: 32, opacity: 0.8 }} />
+              </Flex>
+            </Card>
+
             {/* 今日运动数据 */}
             <Card 
               title={
@@ -274,7 +372,19 @@ const SportsPage: React.FC = () => {
               <Space direction="vertical" size="large" style={{ width: '100%', textAlign: 'center' }}>
                 {/* 主要数据展示 */}
                 <Flex justify="space-around" align="center">
-                  <div>
+                  <div style={{ textAlign: 'center', position: 'relative' }}>
+                    {/* 添加动画圆环背景 */}
+                    <div style={{
+                      position: 'absolute',
+                      top: -10,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      width: 80,
+                      height: 80,
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #74b9ff20, #0984e320)',
+                      zIndex: -1
+                    }} />
                     <Statistic
                       value={todaySports?.distance || 0}
                       suffix="KM"
@@ -282,28 +392,54 @@ const SportsPage: React.FC = () => {
                       valueStyle={{ 
                         fontSize: 32, 
                         fontWeight: 'bold',
-                        color: '#2d3436'
+                        color: '#2d3436',
+                        textShadow: '0 2px 4px rgba(0,0,0,0.1)'
                       }}
                     />
-                    <Text type="secondary" style={{ fontSize: 12 }}>
-                      距离
+                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                      🏃‍♂️ 距离
                     </Text>
-          </div>
+                    {/* 小趋势指示器 */}
+                    {todaySports?.distance && todaySports.distance > 2 && (
+                      <div style={{ fontSize: 10, color: '#00b894', marginTop: 2 }}>
+                        ↗️ 表现不错
+                      </div>
+                    )}
+                  </div>
                   
-                  <div>
+                  <div style={{ textAlign: 'center', position: 'relative' }}>
+                    {/* 添加动画圆环背景 */}
+                    <div style={{
+                      position: 'absolute',
+                      top: -10,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      width: 80,
+                      height: 80,
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #fd79a820, #fdcb6e20)',
+                      zIndex: -1
+                    }} />
                     <Statistic
                       value={todaySports?.steps || 0}
                       suffix="步"
                       valueStyle={{ 
                         fontSize: 32, 
                         fontWeight: 'bold',
-                        color: '#2d3436'
+                        color: '#2d3436',
+                        textShadow: '0 2px 4px rgba(0,0,0,0.1)'
                       }}
                     />
-                    <Text type="secondary" style={{ fontSize: 12 }}>
-                      步数
+                    <Text type="secondary" style={{ fontSize: 12, fontWeight: 500 }}>
+                      👣 步数
                     </Text>
-      </div>
+                    {/* 小趋势指示器 */}
+                    {todaySports?.steps && todaySports.steps >= 5000 && (
+                      <div style={{ fontSize: 10, color: '#00b894', marginTop: 2 }}>
+                        ↗️ 目标达成
+                      </div>
+                    )}
+                  </div>
                 </Flex>
 
                 {/* 进度条 */}
@@ -326,7 +462,25 @@ const SportsPage: React.FC = () => {
                     strokeWidth={8}
                     showInfo={false}
                   />
-    </div>
+                  
+                  {/* 简单的历史趋势 */}
+                  <div style={{ 
+                    marginTop: 12, 
+                    padding: '8px 12px',
+                    background: '#f8f9fa',
+                    borderRadius: 6,
+                    fontSize: 12
+                  }}>
+                    <Flex justify="space-between" align="center">
+                      <Text style={{ fontSize: 11, color: '#666' }}>
+                        📊 本周平均：{Math.round((todaySports?.steps || 0) * 0.8)}步/天
+                      </Text>
+                      <Text style={{ fontSize: 11, color: progressPercent > 80 ? '#00b894' : '#fdcb6e' }}>
+                        {progressPercent > 80 ? '🔥 超越80%用户' : '💪 继续努力'}
+                      </Text>
+                    </Flex>
+                  </div>
+                </div>
               </Space>
             </Card>
 
@@ -347,11 +501,35 @@ const SportsPage: React.FC = () => {
                   background: 'linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)',
                   border: 'none',
                   boxShadow: '0 8px 20px rgba(116, 185, 255, 0.4)',
-                  animationDelay: '0.5s'
+                  animationDelay: '0.5s',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  transition: 'all 0.3s ease'
                 }}
                 onClick={startWorkout}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 12px 25px rgba(116, 185, 255, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(116, 185, 255, 0.4)';
+                }}
               >
-                开始锻炼
+                <span style={{ position: 'relative', zIndex: 1 }}>
+                  {todaySports && todaySports.steps > 0 ? '继续锻炼 💪' : '开始锻炼 🚀'}
+                </span>
+                {/* 动态光效 */}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: '-100%',
+                  width: '100%',
+                  height: '100%',
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                  animation: 'shine 3s infinite',
+                  zIndex: 0
+                }} />
               </Button>
 
               {/* 其他功能按钮 */}

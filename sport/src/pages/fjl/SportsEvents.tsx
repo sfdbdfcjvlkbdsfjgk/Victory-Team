@@ -93,15 +93,25 @@ const SportsEvents: React.FC = () => {
 
   const fetchQuestionnaire = async () => {
     try {
-      // 使用模拟数据替代真实 API 请求
-      const { mockSportsEventsApi } = await import('../../data/mockSportsEventsData');
-      const response = await mockSportsEventsApi.getQuestionnaire();
+      // 使用真实 API 请求
+      const { api } = await import('../../services/api');
+      const response = await api.sportsEvents.getQuestionnaire();
       
       if (response.success) {
         setQuestionnaire(response.data);
       }
     } catch (error) {
       console.error('获取问卷失败:', error);
+      // 如果API请求失败，回退到模拟数据
+      try {
+        const { mockSportsEventsApi } = await import('../../data/mockSportsEventsData');
+        const fallbackResponse = await mockSportsEventsApi.getQuestionnaire();
+        if (fallbackResponse.success) {
+          setQuestionnaire(fallbackResponse.data);
+        }
+      } catch (fallbackError) {
+        console.error('模拟数据也加载失败:', fallbackError);
+      }
     } finally {
       setLoading(false);
     }
@@ -116,9 +126,9 @@ const SportsEvents: React.FC = () => {
     // 提交到后端
     try {
       console.log('📝 提交答案:', { questionId, answer });
-      const { mockSportsEventsApi } = await import('../../data/mockSportsEventsData');
-      const response = await mockSportsEventsApi.submitQuestionnaireResponse({
-        questionnaireId: questionnaire?._id,
+      const { api } = await import('../../services/api');
+      const response = await api.sportsEvents.submitAnswer({
+        questionnaireId: questionnaire?._id || '',
         userId: 'current_user', // 实际应用中应该是真实用户ID
         questionId,
         answer
@@ -142,9 +152,9 @@ const SportsEvents: React.FC = () => {
 
   const completeQuestionnaire = async () => {
     try {
-      const { mockSportsEventsApi } = await import('../../data/mockSportsEventsData');
-      await mockSportsEventsApi.completeQuestionnaire({
-        questionnaireId: questionnaire?._id,
+      const { api } = await import('../../services/api');
+      await api.sportsEvents.completeQuestionnaire({
+        questionnaireId: questionnaire?._id || '',
         userId: 'current_user'
       });
       
@@ -158,8 +168,10 @@ const SportsEvents: React.FC = () => {
   const fetchRecommendations = async () => {
     try {
       console.log('🔍 开始获取推荐结果...');
-      const { mockSportsEventsApi } = await import('../../data/mockSportsEventsData');
-      const response = await mockSportsEventsApi.getRecommendations('current_user');
+      console.log('📝 用户答案:', answers);
+      
+      const { api } = await import('../../services/api');
+      const response = await api.sportsEvents.getRecommendations('current_user');
       console.log('📊 API返回数据:', response);
       
       if (response.success) {

@@ -225,6 +225,71 @@ export const createMockApiResponse = <T>(data: T, success: boolean = true) => ({
   code: success ? 200 : 400
 });
 
+// 完整的推荐数据结构
+export const mockRecommendationData = {
+  examItems: [
+    {
+      _id: '1',
+      name: '1000米跑步',
+      icon: '🏃‍♂️',
+      category: '耐力',
+      difficulty: '中等',
+      priority: 'high',
+      reason: '必考项目，建议优先训练',
+      trainingTips: [
+        '每周至少3次有氧训练',
+        '循序渐进增加跑步距离',
+        '注意跑步姿势和呼吸节奏'
+      ]
+    },
+    {
+      _id: '2',
+      name: '引体向上',
+      icon: '🤸‍♂️',
+      category: '力量',
+      difficulty: '中等',
+      priority: 'medium',
+      reason: '上肢力量训练，提高综合体能',
+      trainingTips: [
+        '先从悬挂开始练习',
+        '逐步增加引体向上次数',
+        '配合其他上肢力量训练'
+      ]
+    }
+  ],
+  trainingCourses: [
+    {
+      _id: '1',
+      title: '个性化健身训练课程',
+      instructor: '专业健身教练',
+      price: 1980,
+      originalPrice: 2980,
+      duration: '60天',
+      level: '中级',
+      rating: 4.9,
+      priority: 'high',
+      reason: '根据您的偏好定制的训练课程',
+      features: ['个性化指导', '科学训练计划', '营养建议']
+    }
+  ],
+  personalizedPlan: {
+    title: '个性化运动训练计划',
+    description: '根据您的问卷回答为您量身定制的运动方案',
+    weeklySchedule: [
+      { day: '周一', activity: '有氧运动30分钟', intensity: '中等' },
+      { day: '周三', activity: '力量训练45分钟', intensity: '中高' },
+      { day: '周五', activity: '柔韧性训练30分钟', intensity: '轻松' },
+      { day: '周日', activity: '户外活动60分钟', intensity: '中等' }
+    ],
+    tips: [
+      '每次运动前进行5-10分钟热身',
+      '根据身体状况调整运动强度',
+      '运动后及时补充水分和营养',
+      '保证充足的休息和睡眠'
+    ]
+  }
+};
+
 // 导出模拟 API 函数
 export const mockSportsEventsApi = {
   // 获取问卷
@@ -244,9 +309,95 @@ export const mockSportsEventsApi = {
     return Promise.resolve(createMockApiResponse({ completed: true }));
   },
 
-  // 获取推荐结果
-  getRecommendations: (userId: string) => {
-    console.log('🔍 模拟获取推荐结果:', userId);
-    return Promise.resolve(createMockApiResponse(mockRecommendations));
+  // 获取推荐结果 - 返回完整的推荐数据结构
+  getRecommendations: (userId: string, answers?: Record<string, any>) => {
+    console.log('🔍 模拟获取推荐结果:', userId, answers);
+    
+    // 根据用户答案生成个性化推荐
+    const personalizedData = generatePersonalizedRecommendations(answers || {});
+    
+    return Promise.resolve(createMockApiResponse(personalizedData));
   }
+};
+
+// 根据用户答案生成个性化推荐
+const generatePersonalizedRecommendations = (answers: Record<string, any>) => {
+  console.log('📊 用户答案:', answers);
+  
+  // 分析用户偏好
+  const gender = answers.q1; // 性别
+  const age = answers.q2; // 年龄段
+  const frequency = answers.q3; // 运动频率
+  const sportsTypes = answers.q4 || []; // 喜欢的运动类型
+  const location = answers.q5; // 运动方式偏好
+  const goals = answers.q6 || []; // 运动目标
+  const duration = answers.q7; // 运动时长
+  const intensity = answers.q8; // 运动强度
+  
+  // 基于答案定制训练计划
+  let personalizedPlan = {
+    title: '个性化运动训练计划',
+    description: '根据您的问卷回答为您量身定制的运动方案',
+    weeklySchedule: [] as any[],
+    tips: [] as string[]
+  };
+  
+  // 根据运动频率调整训练安排
+  if (frequency === 'daily' || frequency === '5-6') {
+    personalizedPlan.weeklySchedule = [
+      { day: '周一', activity: '有氧运动45分钟', intensity: '中等' },
+      { day: '周二', activity: '力量训练30分钟', intensity: '中高' },
+      { day: '周三', activity: '柔韧性训练30分钟', intensity: '轻松' },
+      { day: '周四', activity: '核心训练25分钟', intensity: '中等' },
+      { day: '周五', activity: '间歇训练30分钟', intensity: '高' },
+      { day: '周六', activity: '户外活动60分钟', intensity: '中等' },
+      { day: '周日', activity: '恢复性运动20分钟', intensity: '轻松' }
+    ];
+  } else if (frequency === '3-4') {
+    personalizedPlan.weeklySchedule = [
+      { day: '周一', activity: '有氧运动40分钟', intensity: '中等' },
+      { day: '周三', activity: '力量训练35分钟', intensity: '中高' },
+      { day: '周五', activity: '柔韧性训练30分钟', intensity: '轻松' },
+      { day: '周日', activity: '户外活动50分钟', intensity: '中等' }
+    ];
+  } else {
+    personalizedPlan.weeklySchedule = [
+      { day: '周三', activity: '有氧运动30分钟', intensity: '轻松' },
+      { day: '周六', activity: '力量训练25分钟', intensity: '中等' }
+    ];
+  }
+  
+  // 根据运动目标调整建议
+  personalizedPlan.tips = [
+    '每次运动前进行5-10分钟热身',
+    '根据身体状况调整运动强度',
+    '运动后及时补充水分和营养'
+  ];
+  
+  if (goals.includes('weight-loss')) {
+    personalizedPlan.tips.push('重点进行有氧运动，控制饮食热量摄入');
+  }
+  if (goals.includes('muscle-building')) {
+    personalizedPlan.tips.push('增加蛋白质摄入，注重力量训练');
+  }
+  if (goals.includes('relaxation')) {
+    personalizedPlan.tips.push('可以尝试瑜伽、太极等放松身心的运动');
+  }
+  
+  // 根据性别和年龄调整描述
+  let genderText = gender === 'male' ? '男性' : '女性';
+  let ageText = '';
+  switch(age) {
+    case '18-25': ageText = '青年'; break;
+    case '26-35': ageText = '青壮年'; break;
+    case '36-45': ageText = '中年'; break;
+    default: ageText = '成年';
+  }
+  
+  personalizedPlan.description = `为${ageText}${genderText}量身定制的运动方案，结合您的运动偏好和目标制定`;
+  
+  return {
+    ...mockRecommendationData,
+    personalizedPlan
+  };
 }; 

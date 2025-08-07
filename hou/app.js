@@ -7,9 +7,11 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var uploadRouter = require('./routes/upload');
+var uploadSimpleRouter = require('./routes/upload-simple'); // 简化上传路由
 var sportsRouter = require('./routes/sports');
 var weatherRouter = require('./routes/weather');
 var sportsEventsRouter = require('./routes/sports-events');
+var apiRouter = require('./routes/api'); // 新增API路由
 var cors = require('cors');
 var app = express();
 // CORS配置 - 允许大文件上传
@@ -32,9 +34,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/api/upload', uploadRouter);
+app.use('/api/upload-simple', uploadSimpleRouter); // 简化上传路由
 app.use('/sports', sportsRouter);
 app.use('/weather', weatherRouter);
 app.use('/sports-events', sportsEventsRouter);
+app.use('/api', apiRouter); // 挂载API路由
 
 // 静态文件服务 - 提供上传的文件访问
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

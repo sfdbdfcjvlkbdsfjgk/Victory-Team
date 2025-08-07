@@ -2103,4 +2103,63 @@
 .tag-antd:hover,
 .action-link-antd:hover {
   will-change: auto;
+}
+
+/* =================== 视频播放指示器样式 =================== */
+
+
+
+
+
+/* 视频模态框样式 */
+.ant-modal-content {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.ant-modal-close {
+  top: 16px !important;
+  right: 16px !important;
+  z-index: 1001;
+}
+
+.ant-modal-close .ant-modal-close-x {
+  width: 36px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+}
+
+/* 视频容器样式 */
+.video-modal-container {
+  position: relative;
+  background-color: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.video-modal-container video {
+  width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+.video-title-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  padding: 20px;
+  color: white;
+}
+
+
+
+/* 图片预览模态框样式 */
+.ant-modal .ant-image {
+  display: block;
+}
+
+.ant-modal .ant-image-img {
+  border-radius: 4px;
 } 

@@ -72,7 +72,7 @@ export const useChunkUploadV2 = () => {
     return `${uploadProgress.value.toFixed(1)}%`;
   });
 
-  // 检查已上传的分片
+  // 检查已上传的分片 - 增强版
   const checkUploadedChunks = async (fileHash: string, totalChunks: number) => {
     try {
       const response = await uploadApi.post('/api/upload/check', {
@@ -81,13 +81,59 @@ export const useChunkUploadV2 = () => {
       });
       
       if (response.data.code === 200) {
-        return response.data.data.uploadedChunks || [];
+        const data = response.data.data;
+        
+        // 输出详细的检查结果
+        if (data.needsRetry) {
+          console.warn(`🔄 需要重新上传分片:`, {
+            完整: data.uploadedCount,
+            缺失: data.missingCount,
+            损坏: data.corruptedCount,
+            总计: data.totalChunks,
+            完成率: `${data.completionRate}%`
+          });
+          
+          if (data.missingChunks.length > 0) {
+            console.log(`📋 缺失分片:`, data.missingChunks);
+          }
+          if (data.corruptedChunks.length > 0) {
+            console.log(`💥 损坏分片:`, data.corruptedChunks);
+          }
+        } else {
+          console.log(`✅ 分片检查完成: ${data.completionRate}% (${data.uploadedCount}/${data.totalChunks})`);
+        }
+        
+        return {
+          uploadedChunks: data.uploadedChunks || [],
+          missingChunks: data.missingChunks || [],
+          corruptedChunks: data.corruptedChunks || [],
+          needsRetry: data.needsRetry || false,
+          completionRate: data.completionRate || 0
+        };
       }
-      return [];
+      return {
+        uploadedChunks: [],
+        missingChunks: [],
+        corruptedChunks: [],
+        needsRetry: false,
+        completionRate: 0
+      };
     } catch (error) {
-      console.error('检查分片失败:', error);
-      return [];
+      console.error('❌ 检查分片失败:', error);
+      return {
+        uploadedChunks: [],
+        missingChunks: [],
+        corruptedChunks: [],
+        needsRetry: false,
+        completionRate: 0
+      };
     }
+  };
+
+  // 兼容的分片检查函数 - 只返回上传完成的分片数组（为了向后兼容）
+  const checkUploadedChunksCompat = async (fileHash: string, totalChunks: number): Promise<number[]> => {
+    const result = await checkUploadedChunks(fileHash, totalChunks);
+    return result.uploadedChunks;
   };
 
   // 上传单个分片 - 改进版
@@ -242,10 +288,22 @@ export const useChunkUploadV2 = () => {
       
       // 检查已上传的分片（支持断点续传）
       uploadStatus.value = '检查上传进度...';
-      let uploadedChunks = await checkUploadedChunks(fileHash, totalChunks);
+      const chunkCheckResult = await checkUploadedChunks(fileHash, totalChunks);
       
+      let uploadedChunks = chunkCheckResult.uploadedChunks;
       let uploadedCount = uploadedChunks.length;
       uploadProgress.value = (uploadedCount / totalChunks) * 90;
+      
+      // 如果有损坏的分片，需要重新上传
+      const chunksNeedReupload = [
+        ...chunkCheckResult.missingChunks,
+        ...chunkCheckResult.corruptedChunks
+      ];
+      
+      if (chunksNeedReupload.length > 0) {
+        uploadStatus.value = `发现 ${chunksNeedReupload.length} 个分片需要重新上传`;
+        console.log(`🔄 需要重新上传的分片:`, chunksNeedReupload);
+      }
       
       if (uploadedCount === totalChunks) {
         uploadStatus.value = '验证完整性并合并文件...';
@@ -254,8 +312,11 @@ export const useChunkUploadV2 = () => {
         uploadStatus.value = `${modeText} 上传中... (已完成: ${uploadedCount}/${totalChunks})`;
         onProgress?.(uploadProgress.value, uploadStatus.value);
         
-        // 获取需要上传的分片
-        const chunksToUpload = chunks.filter(chunk => !uploadedChunks.includes(chunk.index));
+        // 获取需要上传的分片（包括缺失和损坏的）
+        const chunksToUpload = chunks.filter(chunk => 
+          chunkCheckResult.missingChunks.includes(chunk.index) || 
+          chunkCheckResult.corruptedChunks.includes(chunk.index)
+        );
         
         console.log(`需要上传 ${chunksToUpload.length} 个分片，已完成 ${uploadedCount} 个`);
         
@@ -385,10 +446,10 @@ export const useChunkUploadV2 = () => {
         uploadStatus.value = '验证分片完整性...';
         onProgress?.(88, uploadStatus.value);
         
-        const finalCheck = await checkUploadedChunks(fileHash, totalChunks);
+        const finalCheckArray = await checkUploadedChunksCompat(fileHash, totalChunks);
         const missingChunks = [];
         for (let i = 0; i < totalChunks; i++) {
-          if (!finalCheck.includes(i)) {
+          if (!finalCheckArray.includes(i)) {
             missingChunks.push(i);
           }
         }
