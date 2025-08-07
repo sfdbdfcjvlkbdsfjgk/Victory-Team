@@ -9,10 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@element-plus/icons-vue": "^2.3.1",
+=======
+    "@vueup/vue-quill": "^1.2.0",
+>>>>>>> 3abb24d5754c542619de2d8b3b17f9e829702c0e
     "axios": "^1.11.0",
     "dayjs": "^1.11.13",
     "element-plus": "^2.10.4",
+    "quill": "^2.0.3",
     "vue": "^3.5.17",
     "vue-router": "^4.5.1"
   },

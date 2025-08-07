@@ -62,6 +62,21 @@ const routes: RouteRecordRaw[] = [
                 path: 'activity/registration',
                 name: 'Registration',
                 component: () => import('@/views/dcy/Registration.vue')
+            },
+            {
+                path: 'activity/registration-form',
+                name: 'ActivityRegistration',
+                component: () => import('@/views/dcy/ActivityRegistration.vue')
+            },
+            {
+                path: 'tag-demo',
+                name: 'TagDemo',
+                component: () => import('@/views/TagDemo.vue')
+            },
+            {
+                path: 'tag-test',
+                name: 'TagTest',
+                component: () => import('@/views/TagTest.vue')
             }
         ]
     }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { User, ArrowDown, Location, Setting, Document, Menu } from '@element-plus/icons-vue';
+import { User, ArrowDown, Location, Setting, Document, Menu, Collection, PriceTag } from '@element-plus/icons-vue';
 
 const router = useRouter();
 
@@ -84,6 +84,18 @@ const logout = () => {
               <template #title>
                 <el-icon><Menu /></el-icon>
                 <span>账号管理-角色管理</span>
+              </template>
+            </el-menu-item>
+            <el-menu-item index="/dashboard/tag-demo">
+              <template #title>
+                <el-icon><Collection /></el-icon>
+                <span>标签展示演示</span>
+              </template>
+            </el-menu-item>
+            <el-menu-item index="/dashboard/tag-test">
+              <template #title>
+                <el-icon><PriceTag /></el-icon>
+                <span>标签测试页面</span>
               </template>
             </el-menu-item>
           </el-menu>

@@ -8,6 +8,15 @@ import Community from '../pages/Community';
 import Sports from '../pages/Sports';
 import Booking from '../pages/Booking';
 import Profile from '../pages/Profile';
+
+import Sou from '../pages/Sou';
+import Activitydetail from '../pages/ActivityDetail';
+import FamilyRegistration from '../pages/FamilyRegistration';
+import PersonalRegistration from '../pages/PersonalRegistration';
+import RegistrationSelection from '../pages/RegistrationSelection';
+import TeamRegistration from '../pages/TeamRegistration';
+import Sp from '../pages/Sp'
+
 import React from 'react';
 
 // 错误页面组件
@@ -49,6 +58,36 @@ export const router = createBrowserRouter([
         path: 'booking',
         element: React.createElement(Booking)
       },
+
+      {
+        path: 'sou',
+        element: React.createElement(Sou)
+      },
+      {
+        path: "/activity-detail/:activityId",
+        element: React.createElement(Activitydetail)
+      },
+      {
+        path: "/personal-registration/:activityId",
+        element: React.createElement(PersonalRegistration)
+      },
+      {
+        path: "/family-registration/:activityId",
+         element: React.createElement(FamilyRegistration)
+      },
+      {
+        path: "/team-registration/:activityId",
+        element: React.createElement(TeamRegistration)
+      },
+      {
+        path: "/registration-selection/:activityId",
+        element: React.createElement(RegistrationSelection)
+      },
+      {
+        path: 'sp',
+        element: React.createElement(Sp)
+      },
+     
       {
         path: 'profile',
         element: React.createElement(Profile),
