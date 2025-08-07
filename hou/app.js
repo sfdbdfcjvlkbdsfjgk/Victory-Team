@@ -7,11 +7,14 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var uploadRouter = require('./routes/upload');
+var sportsRouter = require('./routes/sports');
+var weatherRouter = require('./routes/weather');
+var sportsEventsRouter = require('./routes/sports-events');
 var cors = require('cors');
 var app = express();
 // CORS配置 - 允许大文件上传
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'],
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000', 'http://127.0.0.1:5173'],
   credentials: true,
   optionsSuccessStatus: 200
 }));
@@ -29,6 +32,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/api/upload', uploadRouter);
+app.use('/sports', sportsRouter);
+app.use('/weather', weatherRouter);
+app.use('/sports-events', sportsEventsRouter);
 
 // 静态文件服务 - 提供上传的文件访问
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

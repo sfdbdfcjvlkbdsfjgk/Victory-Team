@@ -413,7 +413,8 @@ const handleFormSubmit = async (submitData: Partial<Banner>) => {
     activeTab.value = "banner";
     await fetchData();
 
-    // 重置表单
+    // 使用 nextTick 确保在切换标签页后再重置表单数据
+    await nextTick();
     resetFormData();
   } catch (error) {
     console.error("提交失败:", error);
@@ -434,7 +435,9 @@ const handleUploadProgress = (progress: number) => {
 // 重置表单数据
 const resetFormData = () => {
   Object.assign(formData, {
+    _id: undefined, // 确保清除ID
     title: "",
+    subtitle: "", // 副标题
     imageUrl: "",
     redirectType: "内部",
     redirectUrl: "",
@@ -443,7 +446,16 @@ const resetFormData = () => {
     status: "待发布",
     locationType: "首页banner位",
     timeRange: [],
-    _id: undefined, // 确保清除ID
+    // 快捷功能专用字段
+    icon: "",
+    type: "",
+    // 活动专用字段
+    description: "",
+    category: "",
+    location: "",
+    participants: 0,
+    // 排序字段
+    sortOrder: 0
   });
 };
 
@@ -472,7 +484,14 @@ const handleCreate = () => {
     title: "新建广告运营位",
   });
   activeTab.value = newTabId;
+  
+  // 使用 nextTick 确保在组件渲染完成后再重置表单数据
+  nextTick(() => {
   resetFormData();
+    if (process.env.NODE_ENV === "development") {
+      console.log("🆕 新建表单已重置:", JSON.stringify(formData, null, 2));
+    }
+  });
 };
 
 // 排序
@@ -979,7 +998,14 @@ const handleCancel = () => {
   const currentTabId = activeTab.value;
   closeTab(currentTabId);
   activeTab.value = "banner";
+  
+  // 使用 nextTick 确保在切换标签页后再重置表单数据
+  nextTick(() => {
   resetFormData();
+    if (process.env.NODE_ENV === "development") {
+      console.log("❌ 取消操作，表单已重置");
+    }
+  });
 };
 
 

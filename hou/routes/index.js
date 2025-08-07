@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const { Banner } = require('../models/index');
+const { Banner, Notification, FeatureIntro, CategoryTag, Content, UserAction } = require('../models/index');
 const multer = require('multer');
 const xlsx = require('node-xlsx');
 const path = require('path');
@@ -502,6 +502,537 @@ router.get('/banner/template', (req, res) => {
     res.send({
       code: 500,
       msg: `模板下载失败: ${error.message}`
+    });
+  }
+});
+
+// ===== 前端首页API路由 =====
+
+// 获取首页横幅
+router.get('/home/banner', async (req, res) => {
+  try {
+    const banners = await Banner.find({ 
+      locationType: '首页banner位',
+      status: { $in: ['已发布', 'active'] }
+    }).sort({ sortOrder: 1 });
+    
+    // 转换为前端期望的格式
+    const formattedBanners = banners.map(banner => ({
+      _id: banner._id,
+      title: banner.title,
+      subtitle: banner.subtitle,
+      imageUrl: banner.imageUrl.startsWith('/uploads/') 
+        ? `http://localhost:3000${banner.imageUrl}` 
+        : banner.imageUrl,
+      redirectUrl: banner.redirectUrl,
+      startTime: banner.startTime,
+      endTime: banner.endTime,
+      status: banner.status === '已发布' ? 'active' : banner.status,
+      createdAt: banner.createdAt
+    }));
+    
+    res.json({
+      code: 200,
+      message: 'success',
+      data: formattedBanners,
+      success: true
+    });
+  } catch (error) {
+    res.json({
+      code: 500,
+      message: error.message,
+      data: [],
+      success: false
+    });
+  }
+});
+
+// 获取快捷功能
+router.get('/home/quick-actions', async (req, res) => {
+  try {
+    const actions = await Banner.find({
+      locationType: '快捷功能',
+      status: { $in: ['已发布', 'active'] }
+    }).sort({ sortOrder: 1 });
+    
+    // 转换为前端期望的格式
+    const formattedActions = actions.map(action => ({
+      _id: action._id,
+      title: action.title,
+      icon: action.icon,
+      type: action.type,
+      redirectUrl: action.redirectUrl,
+      sortOrder: action.sortOrder,
+      status: action.status === '已发布' ? 'active' : action.status
+    }));
+    
+    res.json({
+      code: 200,
+      message: 'success',
+      data: formattedActions,
+      success: true
+    });
+  } catch (error) {
+    res.json({
+      code: 500,
+      message: error.message,
+      data: [],
+      success: false
+    });
+  }
+});
+
+// 获取通知列表
+router.get('/home/notifications', async (req, res) => {
+  try {
+    const { limit = 10 } = req.query;
+    const notifications = await Notification.find()
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit));
+    
+    res.json({
+      code: 200,
+      message: 'success',
+      data: notifications,
+      success: true
+    });
+  } catch (error) {
+    res.json({
+      code: 500,
+      message: error.message,
+      data: [],
+      success: false
+    });
+  }
+});
+
+// 获取热门活动
+router.get('/home/activities', async (req, res) => {
+  try {
+    const { limit = 10 } = req.query;
+    const activities = await Banner.find({
+      locationType: '活动',
+      status: { $in: ['已发布', 'active'] }
+    }).sort({ participants: -1, createdAt: -1 }).limit(parseInt(limit));
+    
+    // 转换为前端期望的格式
+    const formattedActivities = activities.map(activity => ({
+      _id: activity._id,
+      title: activity.title,
+      description: activity.description,
+      imageUrl: activity.imageUrl && activity.imageUrl.startsWith('/uploads/') 
+        ? `http://localhost:3000${activity.imageUrl}` 
+        : activity.imageUrl,
+      participants: activity.participants,
+      status: activity.status === '已发布' ? 'active' : activity.status,
+      category: activity.category,
+      startTime: activity.startTime,
+      endTime: activity.endTime,
+      location: activity.location,
+      createdAt: activity.createdAt
+    }));
+    
+    res.json({
+      code: 200,
+      message: 'success',
+      data: formattedActivities,
+      success: true
+    });
+  } catch (error) {
+    res.json({
+      code: 500,
+      message: error.message,
+      data: [],
+      success: false
+    });
+  }
+});
+
+// 获取功能介绍
+router.get('/home/feature-intros', async (req, res) => {
+  try {
+    const features = await FeatureIntro.find({ status: 'active' });
+    
+    res.json({
+      code: 200,
+      message: 'success',
+      data: features,
+      success: true
+    });
+  } catch (error) {
+    res.json({
+      code: 500,
+      message: error.message,
+      data: [],
+      success: false
+    });
+  }
+});
+
+// 获取分类标签
+router.get('/home/category-tags', async (req, res) => {
+  try {
+    const tags = await CategoryTag.find().sort({ sortOrder: 1 });
+    
+    res.json({
+      code: 200,
+      message: 'success',
+      data: tags,
+      success: true
+    });
+  } catch (error) {
+    res.json({
+      code: 500,
+      message: error.message,
+      data: [],
+      success: false
+    });
+  }
+});
+
+// 活动报名
+router.post('/activities/join', async (req, res) => {
+  try {
+    const { activityId } = req.body;
+    
+    if (!activityId) {
+      return res.json({
+        code: 400,
+        message: '缺少活动ID',
+        success: false
+      });
+    }
+    
+    // 更新活动报名人数
+    const activity = await Banner.findOneAndUpdate(
+      { _id: activityId, locationType: '活动' },
+      { $inc: { participants: 1 } },
+      { new: true }
+    );
+    
+    if (!activity) {
+      return res.json({
+        code: 404,
+        message: '活动不存在',
+        success: false
+      });
+    }
+    
+    res.json({
+      code: 200,
+      message: '报名成功',
+      data: { participants: activity.participants },
+      success: true
+    });
+  } catch (error) {
+    res.json({
+      code: 500,
+      message: error.message,
+      success: false
+    });
+  }
+});
+
+// 消除消息红点提示
+router.post('/notifications/clear-red-dot', async (req, res) => {
+  try {
+    const { category } = req.body; // 'system' 或 'sports' 或 'all'
+    
+    let updateCondition = {};
+    if (category && category !== 'all') {
+      updateCondition.category = category;
+    }
+    
+    // 将指定分类的所有消息红点设为不显示
+    await Notification.updateMany(
+      updateCondition,
+      { showRedDot: false }
+    );
+    
+    res.json({
+      code: 200,
+      message: '红点已清除',
+      success: true
+    });
+  } catch (error) {
+    res.json({
+      code: 500,
+      message: error.message,
+      success: false
+    });
+  }
+});
+
+// 获取未读消息数量（红点统计）
+router.get('/notifications/unread-count', async (req, res) => {
+  try {
+    const systemCount = await Notification.countDocuments({ 
+      category: 'system', 
+      showRedDot: true 
+    });
+    
+    const sportsCount = await Notification.countDocuments({ 
+      category: 'sports', 
+      showRedDot: true 
+    });
+    
+    res.json({
+      code: 200,
+      message: 'success',
+      data: {
+        system: systemCount,
+        sports: sportsCount,
+        total: systemCount + sportsCount
+      },
+      success: true
+    });
+  } catch (error) {
+    res.json({
+      code: 500,
+      message: error.message,
+      data: { system: 0, sports: 0, total: 0 },
+      success: false
+    });
+  }
+});
+
+// ===== 体育内容信息流API =====
+
+// 获取内容列表
+router.get('/content/list', async (req, res) => {
+  try {
+    const { 
+      type, // 'article' | 'video' | 'all'
+      category, 
+      featured, 
+      limit = 10, 
+      page = 1 
+    } = req.query;
+    
+    let query = { status: 'published' };
+    
+    if (type && type !== 'all') {
+      query.type = type;
+    }
+    if (category) {
+      query.category = category;
+    }
+    if (featured) {
+      query.featured = featured === 'true';
+    }
+    
+    const skip = (page - 1) * limit;
+    const contents = await Content.find(query)
+      .sort({ publishedAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await Content.countDocuments(query);
+    
+    res.json({
+      code: 200,
+      message: 'success',
+      data: {
+        list: contents,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          pages: Math.ceil(total / limit)
+        }
+      },
+      success: true
+    });
+  } catch (error) {
+    res.json({
+      code: 500,
+      message: error.message,
+      data: { list: [], pagination: {} },
+      success: false
+    });
+  }
+});
+
+// 获取内容详情
+router.get('/content/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const content = await Content.findById(id);
+    
+    if (!content) {
+      return res.json({
+        code: 404,
+        message: '内容不存在',
+        success: false
+      });
+    }
+    
+    // 增加浏览量
+    await Content.findByIdAndUpdate(id, { $inc: { viewCount: 1 } });
+    content.viewCount += 1;
+    
+    res.json({
+      code: 200,
+      message: 'success',
+      data: content,
+      success: true
+    });
+  } catch (error) {
+    res.json({
+      code: 500,
+      message: error.message,
+      success: false
+    });
+  }
+});
+
+// 用户互动：点赞
+router.post('/content/:id/like', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId = 'anonymous' } = req.body;
+    
+    // 检查是否已经点过赞
+    const existingLike = await UserAction.findOne({
+      userId,
+      contentId: id,
+      actionType: 'like'
+    });
+    
+    if (existingLike) {
+      // 取消点赞
+      await UserAction.deleteOne({ _id: existingLike._id });
+      await Content.findByIdAndUpdate(id, { $inc: { likeCount: -1 } });
+      
+      res.json({
+        code: 200,
+        message: '取消点赞',
+        data: { liked: false },
+        success: true
+      });
+    } else {
+      // 新增点赞
+      await UserAction.create({
+        userId,
+        contentId: id,
+        actionType: 'like'
+      });
+      await Content.findByIdAndUpdate(id, { $inc: { likeCount: 1 } });
+      
+      res.json({
+        code: 200,
+        message: '点赞成功',
+        data: { liked: true },
+        success: true
+      });
+    }
+  } catch (error) {
+    res.json({
+      code: 500,
+      message: error.message,
+      success: false
+    });
+  }
+});
+
+// 用户互动：评论
+router.post('/content/:id/comment', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId = 'anonymous', commentText } = req.body;
+    
+    if (!commentText) {
+      return res.json({
+        code: 400,
+        message: '评论内容不能为空',
+        success: false
+      });
+    }
+    
+    // 添加评论记录
+    await UserAction.create({
+      userId,
+      contentId: id,
+      actionType: 'comment',
+      commentText
+    });
+    
+    // 增加评论数量
+    await Content.findByIdAndUpdate(id, { $inc: { commentCount: 1 } });
+    
+    res.json({
+      code: 200,
+      message: '评论成功',
+      success: true
+    });
+  } catch (error) {
+    res.json({
+      code: 500,
+      message: error.message,
+      success: false
+    });
+  }
+});
+
+// 用户互动：分享
+router.post('/content/:id/share', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId = 'anonymous' } = req.body;
+    
+    // 添加分享记录
+    await UserAction.create({
+      userId,
+      contentId: id,
+      actionType: 'share'
+    });
+    
+    // 增加分享数量
+    await Content.findByIdAndUpdate(id, { $inc: { shareCount: 1 } });
+    
+    res.json({
+      code: 200,
+      message: '分享成功',
+      success: true
+    });
+  } catch (error) {
+    res.json({
+      code: 500,
+      message: error.message,
+      success: false
+    });
+  }
+});
+
+// 获取用户对内容的互动状态
+router.get('/content/:id/user-actions', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId = 'anonymous' } = req.query;
+    
+    const actions = await UserAction.find({
+      userId,
+      contentId: id
+    });
+    
+    const userActions = {
+      liked: actions.some(action => action.actionType === 'like'),
+      commented: actions.some(action => action.actionType === 'comment'),
+      shared: actions.some(action => action.actionType === 'share')
+    };
+    
+    res.json({
+      code: 200,
+      message: 'success',
+      data: userActions,
+      success: true
+    });
+  } catch (error) {
+    res.json({
+      code: 500,
+      message: error.message,
+      data: { liked: false, commented: false, shared: false },
+      success: false
     });
   }
 });

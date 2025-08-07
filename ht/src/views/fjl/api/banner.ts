@@ -6,19 +6,30 @@ const api = axios.create({
   timeout: 5000
 })
 
-// Banner接口类型定义
+// Banner接口类型定义（与hou后端模型完全匹配）
 export interface Banner {
   _id?: string
-  locationType: string
+  // 运营位类型 - 与hou后端枚举值匹配
+  locationType: '首页banner位' | '快捷功能' | '活动'
   title: string
+  subtitle?: string  // 副标题字段
   imageUrl: string
   redirectType: '内部' | '外部'
   redirectUrl: string
   startTime: string | Date
   endTime: string | Date
-  status: '待发布' | '已发布' | '已下线'
+  // 状态 - 与hou后端枚举值匹配
+  status: '待发布' | '已发布' | '已下线' | 'active' | 'inactive' | 'ended' | 'upcoming'
   sortOrder?: number
   createdAt?: string | Date
+  // 快捷功能专用字段
+  icon?: string
+  type?: 'booking' | 'activity' | 'event' | 'preference' | 'youth'
+  // 活动专用字段  
+  description?: string
+  participants?: number
+  category?: string
+  location?: string
 }
 
 // 查询参数类型

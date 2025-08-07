@@ -1,0 +1,93 @@
+.virtual-list-container {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+.virtual-list-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.virtual-list-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.virtual-list-container::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 4px;
+}
+
+.virtual-list-container::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
+
+.virtual-list-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.virtual-list-content {
+  width: 100%;
+}
+
+.virtual-list-item {
+  width: 100%;
+  animation-duration: 0.6s;
+  animation-fill-mode: both;
+}
+
+.virtual-list-sentinel {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.virtual-list-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 14px;
+}
+
+.virtual-list-empty {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 加载动画 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.virtual-list-item.animate__fadeInUp {
+  animation-name: fadeInUp;
+}
+
+/* 滚动条样式优化 */
+.virtual-list-container {
+  scroll-behavior: smooth;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .virtual-list-container::-webkit-scrollbar {
+    width: 2px;
+  }
+  
+  .virtual-list-item {
+    animation-duration: 0.4s;
+  }
+} 

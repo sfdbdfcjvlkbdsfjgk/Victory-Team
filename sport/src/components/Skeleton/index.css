@@ -1,0 +1,218 @@
+/* 基础骨架屏样式 */
+.skeleton {
+  background-color: #e0e0e0;
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 脉冲动画 */
+.skeleton-pulse {
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* 波浪动画 */
+.skeleton-wave {
+  animation: skeleton-wave 1.6s linear infinite;
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes skeleton-wave {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* 无动画 */
+.skeleton-none {
+  background-color: #e0e0e0;
+}
+
+/* 骨架屏容器 */
+.skeleton-container {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 横幅骨架屏 */
+.banner-skeleton {
+  background-color: #fff;
+  padding: 0;
+  margin-bottom: 16px;
+}
+
+/* 快捷功能骨架屏 */
+.quick-actions-skeleton {
+  background-color: #fff;
+  padding: 20px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.quick-action-skeleton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 60px;
+}
+
+/* 通知骨架屏 */
+.notification-skeleton {
+  background-color: #fff;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 功能模块骨架屏 */
+.modules-skeleton {
+  background-color: #fff;
+  padding: 16px;
+  margin-bottom: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.module-card-skeleton {
+  padding: 16px 12px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* 活动列表骨架屏 */
+.activities-skeleton {
+  background-color: #fff;
+  margin-bottom: 16px;
+}
+
+.activities-skeleton > .skeleton:first-child {
+  padding: 16px 16px 0 16px;
+  margin-bottom: 16px;
+}
+
+.activity-card-skeleton {
+  display: flex;
+  background-color: #fff;
+  margin: 0 16px 16px 16px;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.activity-card-skeleton:last-child {
+  margin-bottom: 16px;
+}
+
+.activity-skeleton-image {
+  width: 100px;
+  height: 80px;
+  flex-shrink: 0;
+  margin-right: 12px;
+}
+
+.activity-skeleton-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.activity-skeleton-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 标签骨架屏 */
+.tags-skeleton {
+  background-color: #fff;
+  padding: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+}
+
+.tag-skeleton {
+  flex-shrink: 0;
+  height: 32px;
+  border-radius: 16px;
+}
+
+/* 完整页面骨架屏 */
+.home-page-skeleton {
+  background: #f7fafd;
+  min-height: 100vh;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .modules-skeleton {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .quick-actions-skeleton {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  
+  .activity-card-skeleton {
+    margin: 0 8px 12px 8px;
+  }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .skeleton {
+    background-color: #333;
+  }
+  
+  .skeleton-wave {
+    background: linear-gradient(90deg, #333 25%, #444 50%, #333 75%);
+  }
+  
+  .skeleton-none {
+    background-color: #333;
+  }
+  
+  .module-card-skeleton {
+    background-color: #2a2a2a;
+  }
+}
+
+/* 可访问性 */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-pulse,
+  .skeleton-wave {
+    animation: none;
+  }
+} 

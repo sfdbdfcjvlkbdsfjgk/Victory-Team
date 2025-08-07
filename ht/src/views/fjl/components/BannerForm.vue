@@ -12,9 +12,11 @@
           v-model="formData.locationType"
           placeholder="请选择运营位"
           class="form-select"
+          @change="handleLocationTypeChange"
         >
           <el-option label="首页banner位" value="首页banner位" />
-          <el-option label="首页功能位" value="首页功能位" />
+          <el-option label="快捷功能" value="快捷功能" />
+          <el-option label="活动" value="活动" />
         </el-select>
       </el-form-item>
 
@@ -31,7 +33,92 @@
         </div>
       </el-form-item>
 
-      <el-form-item label="*图片上传:" prop="imageUrl">
+      <el-form-item label="副标题:" prop="subtitle">
+        <div class="input-with-hint">
+          <el-input
+            v-model="formData.subtitle"
+            placeholder="请输入副标题（可选）"
+            maxlength="50"
+            show-word-limit
+            class="form-input"
+          />
+          <span class="hint-text">1~50个字符，用于前端显示</span>
+        </div>
+      </el-form-item>
+
+      <!-- 快捷功能专用字段 -->
+      <template v-if="formData.locationType === '快捷功能'">
+        <el-form-item label="*图标:" prop="icon">
+          <el-input
+            v-model="formData.icon"
+            placeholder="请输入图标（如：🏟️）"
+            class="form-input"
+          />
+        </el-form-item>
+
+        <el-form-item label="*功能类型:" prop="type">
+          <el-select
+            v-model="formData.type"
+            placeholder="请选择功能类型"
+            class="form-select"
+          >
+            <el-option label="场地预约" value="booking" />
+            <el-option label="活动相关" value="activity" />
+            <el-option label="体育赛事" value="event" />
+            <el-option label="个人设置" value="preference" />
+            <el-option label="青少年赛" value="youth" />
+          </el-select>
+        </el-form-item>
+      </template>
+
+      <!-- 活动专用字段 -->
+      <template v-if="formData.locationType === '活动'">
+        <el-form-item label="活动描述:" prop="description">
+          <el-input
+            v-model="formData.description"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入活动描述"
+            maxlength="200"
+            show-word-limit
+          />
+        </el-form-item>
+
+        <el-form-item label="活动分类:" prop="category">
+          <el-select
+            v-model="formData.category"
+            placeholder="请选择活动分类"
+            class="form-select"
+          >
+            <el-option label="跑步" value="跑步" />
+            <el-option label="训练" value="训练" />
+            <el-option label="综合" value="综合" />
+            <el-option label="足球" value="足球" />
+            <el-option label="篮球" value="篮球" />
+            <el-option label="瑜伽" value="瑜伽" />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="活动地点:" prop="location">
+          <el-input
+            v-model="formData.location"
+            placeholder="请输入活动地点"
+            class="form-input"
+          />
+        </el-form-item>
+
+        <el-form-item label="报名人数:" prop="participants">
+          <el-input-number
+            v-model="formData.participants"
+            :min="0"
+            :max="9999"
+            placeholder="0"
+            class="form-input"
+          />
+        </el-form-item>
+      </template>
+
+      <el-form-item label="*图片上传:" prop="imageUrl" v-if="formData.locationType !== '快捷功能'">
         <FileUpload
           v-model="formData.imageUrl"
           :accept="uploadConfig.accept"
@@ -205,6 +292,37 @@ const checkOnlineLimit = async (): Promise<boolean> => {
     }
   }
   return true;
+};
+
+// 处理运营位类型变化
+const handleLocationTypeChange = (value: string): void => {
+  const newFormData = { ...formData.value };
+  
+  // 根据类型清空不相关的字段
+  if (value === '快捷功能') {
+    // 快捷功能不需要图片
+    newFormData.imageUrl = '';
+    newFormData.subtitle = '';
+    // 清空活动字段
+    newFormData.description = '';
+    newFormData.category = '';
+    newFormData.location = '';
+    newFormData.participants = 0;
+  } else if (value === '活动') {
+    // 清空快捷功能字段
+    newFormData.icon = '';
+    newFormData.type = '';
+  } else if (value === '首页banner位') {
+    // 清空其他字段
+    newFormData.icon = '';
+    newFormData.type = '';
+    newFormData.description = '';
+    newFormData.category = '';
+    newFormData.location = '';
+    newFormData.participants = 0;
+  }
+  
+  emit('update:modelValue', newFormData);
 };
 
 // 处理时间范围变化

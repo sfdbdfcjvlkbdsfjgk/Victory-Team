@@ -1,0 +1,57 @@
+.infinite-scroll-container {
+  width: 100%;
+}
+
+.infinite-scroll-sentinel {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.infinite-scroll-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 14px;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation-duration: 0.5s;
+}
+
+/* 加载动画增强 */
+.infinite-scroll-loading .ant-spin {
+  color: #4A90E2;
+}
+
+/* 呼吸效果 */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.infinite-scroll-loading {
+  animation: pulse 2s infinite;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .infinite-scroll-sentinel {
+    height: 50px;
+    margin: 12px 0;
+  }
+  
+  .infinite-scroll-loading {
+    font-size: 13px;
+    padding: 10px;
+  }
+} 

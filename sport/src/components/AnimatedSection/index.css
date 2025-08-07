@@ -1,0 +1,263 @@
+/* 动画基础样式 */
+.animated-section {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.animated-section.animate {
+  opacity: 1;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* 淡入向上 */
+.fadeInUp {
+  transform: translateY(30px);
+}
+
+.fadeInUp.animate {
+  animation-name: fadeInUp;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 淡入向下 */
+.fadeInDown {
+  transform: translateY(-30px);
+}
+
+.fadeInDown.animate {
+  animation-name: fadeInDown;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 淡入向左 */
+.fadeInLeft {
+  transform: translateX(-30px);
+}
+
+.fadeInLeft.animate {
+  animation-name: fadeInLeft;
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 淡入向右 */
+.fadeInRight {
+  transform: translateX(30px);
+}
+
+.fadeInRight.animate {
+  animation-name: fadeInRight;
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 弹跳进入 */
+.bounceIn {
+  transform: scale3d(0.3, 0.3, 0.3);
+}
+
+.bounceIn.animate {
+  animation-name: bounceIn;
+}
+
+@keyframes bounceIn {
+  from,
+  20%,
+  40%,
+  60%,
+  80%,
+  to {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+
+  0% {
+    opacity: 0;
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+
+  20% {
+    transform: scale3d(1.1, 1.1, 1.1);
+  }
+
+  40% {
+    transform: scale3d(0.9, 0.9, 0.9);
+  }
+
+  60% {
+    opacity: 1;
+    transform: scale3d(1.03, 1.03, 1.03);
+  }
+
+  80% {
+    transform: scale3d(0.97, 0.97, 0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale3d(1, 1, 1);
+  }
+}
+
+/* 滑入向上 */
+.slideInUp {
+  transform: translateY(100%);
+}
+
+.slideInUp.animate {
+  animation-name: slideInUp;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%);
+    visibility: visible;
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* 缩放进入 */
+.zoomIn {
+  transform: scale3d(0.3, 0.3, 0.3);
+}
+
+.zoomIn.animate {
+  animation-name: zoomIn;
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* 脉冲动画 */
+.pulse.animate {
+  animation-name: pulse;
+  animation-iteration-count: infinite;
+}
+
+@keyframes pulse {
+  from {
+    transform: scale3d(1, 1, 1);
+  }
+
+  50% {
+    transform: scale3d(1.05, 1.05, 1.05);
+  }
+
+  to {
+    transform: scale3d(1, 1, 1);
+  }
+}
+
+/* 交互动画 */
+.hover-float {
+  transition: transform 0.3s ease;
+}
+
+.hover-float:hover {
+  transform: translateY(-5px);
+}
+
+.hover-scale {
+  transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.hover-glow {
+  transition: box-shadow 0.3s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
+}
+
+/* 响应式动画优化 */
+@media (max-width: 768px) {
+  .animated-section {
+    animation-duration: 0.4s !important;
+  }
+  
+  .fadeInUp,
+  .fadeInDown {
+    transform: translateY(20px);
+  }
+  
+  .fadeInLeft,
+  .fadeInRight {
+    transform: translateX(20px);
+  }
+}
+
+/* 减少动画偏好设置 */
+@media (prefers-reduced-motion: reduce) {
+  .animated-section {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .animated-section.animate {
+    opacity: 1;
+    transform: none !important;
+  }
+}
+
+/* 性能优化 */
+.animated-section {
+  will-change: transform, opacity;
+}
+
+.animated-section.animate {
+  will-change: auto;
+} 

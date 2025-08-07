@@ -1,0 +1,61 @@
+.quick-actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 24px 16px;
+  background-color: #fff;
+  margin-bottom: 8px;
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #333;
+  min-width: 60px;
+  transition: transform 0.2s ease;
+}
+
+.action-item:hover {
+  transform: scale(1.05);
+}
+
+.action-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 8px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.action-icon.venues {
+  background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+}
+
+.action-icon.activities {
+  background: linear-gradient(135deg, #4ECDC4, #44A08D);
+}
+
+.action-icon.events {
+  background: linear-gradient(135deg, #45B7D1, #96C93D);
+}
+
+.action-icon.preferences {
+  background: linear-gradient(135deg, #F7DC6F, #F39C12);
+}
+
+.action-icon.youth {
+  background: linear-gradient(135deg, #BB6BD9, #C44569);
+}
+
+.action-item span {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  font-weight: 500;
+} 
