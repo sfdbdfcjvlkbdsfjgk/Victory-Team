@@ -1,9 +1,12 @@
 <template>
   <div class="publish-event">
 <<<<<<< HEAD
+<<<<<<< HEAD
     <h2>发布活动（赛事活动）</h2>
     
 =======
+=======
+>>>>>>> 3abb24d5754c542619de2d8b3b17f9e829702c0e
     <h2>发布活动（含赛事活动）</h2>
     <div class="publish-content">
       <el-form :model="eventForm" label-width="120px" :rules="rules" ref="formRef">
@@ -569,15 +572,21 @@
         </div>
       </template>
     </el-dialog>
+<<<<<<< HEAD
+>>>>>>> 3abb24d5754c542619de2d8b3b17f9e829702c0e
+=======
 >>>>>>> 3abb24d5754c542619de2d8b3b17f9e829702c0e
   </div>
 </template>
 
 <script setup lang="ts">
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 
 =======
+=======
+>>>>>>> 3abb24d5754c542619de2d8b3b17f9e829702c0e
 import { ref, reactive, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Delete, Plus, User, Phone, Location, Document, Edit, InfoFilled, Collection, PriceTag, Close, Check } from '@element-plus/icons-vue'
@@ -1773,6 +1782,9 @@ watch(() => eventForm.activityAddress.city, (newVal) => {
     eventForm.activityAddress.district = ''
   }
 })
+<<<<<<< HEAD
+>>>>>>> 3abb24d5754c542619de2d8b3b17f9e829702c0e
+=======
 >>>>>>> 3abb24d5754c542619de2d8b3b17f9e829702c0e
 </script>
 
@@ -2042,8 +2054,295 @@ watch(() => eventForm.activityAddress.city, (newVal) => {
   padding: 20px;
 }
 
+<<<<<<< HEAD
 :deep(.el-alert) {
   margin: 0;
+=======
+.publish-content {
+  margin-top: 20px;
+  max-width: 1000px;
+}
+
+.hint-text {
+  margin-left: 10px;
+  color: #999;
+  font-size: 12px;
+}
+
+.unit-text {
+  margin-left: 10px;
+  color: #666;
+}
+
+.editor-card {
+  margin-bottom: 20px;
+}
+
+/* QuillEditor样式优化 */
+:deep(.ql-editor) {
+  min-height: 250px;
+  font-family: 'Microsoft YaHei', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+:deep(.ql-toolbar) {
+  border-top: 1px solid #dcdfe6;
+  border-left: 1px solid #dcdfe6;
+  border-right: 1px solid #dcdfe6;
+  background-color: #f5f7fa;
+}
+
+:deep(.ql-container) {
+  border-bottom: 1px solid #dcdfe6;
+  border-left: 1px solid #dcdfe6;
+  border-right: 1px solid #dcdfe6;
+  border-radius: 0 0 4px 4px;
+}
+
+:deep(.ql-editor:focus) {
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+}
+
+.upload-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.upload-area {
+  width: 200px;
+  height: 120px;
+  border: 2px dashed #d9d9d9;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.upload-area:hover {
+  border-color: #409eff;
+}
+
+.upload-placeholder {
+  text-align: center;
+  color: #999;
+}
+
+.upload-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.uploaded-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.upload-hint {
+  color: #999;
+  font-size: 12px;
+  line-height: 1.4;
+  max-width: 200px;
+}
+
+.label-text {
+  color: #666;
+  margin-right: 10px;
+}
+
+.items-table {
+  width: 100%;
+}
+
+.form-fields-table {
+  width: 100%;
+}
+
+.address-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.coordinates-container {
+  display: flex;
+  align-items: center;
+}
+
+/* 表格样式优化 */
+:deep(.el-table .el-input-number) {
+  width: 100%;
+}
+
+:deep(.el-table .el-input) {
+  width: 100%;
+}
+
+:deep(.el-table .el-checkbox) {
+  margin: 0;
+}
+
+.registration-method {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.team-registration {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.children-age-restriction,
+.registrant-age-restriction {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.age-inputs,
+.birth-inputs {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  gap: 5px;
+}
+
+.age-inputs span,
+.birth-inputs span {
+  color: #666;
+  margin: 0 5px;
+}
+
+.field-options {
+  margin-top: 15px;
+  padding: 15px;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  background-color: #fafafa;
+}
+
+.options-header {
+  margin-bottom: 10px;
+}
+
+.options-title {
+  font-weight: bold;
+  color: #333;
+}
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.add-field-buttons {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+/* Element Plus 组件样式 */
+.items-card,
+.insurance-card,
+.registration-method-card,
+.age-restriction-card,
+.gender-restriction-card,
+.phone-card,
+.address-card,
+.form-fields-card {
+  margin-bottom: 20px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+}
+
+.card-header .el-icon {
+  font-size: 18px;
+  color: #409eff;
+}
+
+.team-registration {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+
+
+.address-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* 表格样式优化 */
+:deep(.el-table .el-input-number) {
+  width: 100%;
+}
+
+:deep(.el-table .el-input) {
+  width: 100%;
+}
+
+:deep(.el-table .el-checkbox) {
+  margin: 0;
+}
+
+:deep(.el-card__header) {
+  padding: 15px 20px;
+  border-bottom: 1px solid #ebeef5;
+  background-color: #fafafa;
+}
+
+:deep(.el-card__body) {
+  padding: 20px;
+}
+
+:deep(.el-alert) {
+  margin: 0;
+}
+
+/* 标签模态框样式优化 */
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.el-tag.selected {
+  background-color: #409eff !important;
+  color: white !important;
+  border-color: #409eff !important;
+}
+
+.el-tag:hover {
+  transform: scale(1.05);
+}
+
+.loading-container {
+  padding: 20px;
+>>>>>>> 3abb24d5754c542619de2d8b3b17f9e829702c0e
 }
 
 /* 标签模态框样式优化 */
