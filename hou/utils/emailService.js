@@ -6,8 +6,8 @@ const EMAIL_CONFIG = {
   port: 587,  // QQ邮箱SMTP端口
   secure: false,  // 使用TLS
   auth: {
-    user: process.env.EMAIL_USER || '1355676090@qq.com', // 发件人邮箱
-    pass: process.env.EMAIL_PASS || 'uftjphcpzgdogddc'   // QQ邮箱授权码
+    user: process.env.EMAIL_USER || '1485260435@qq.com', // 发件人邮箱
+    pass: process.env.EMAIL_PASS || 'cevmjpcbzaheiffc'   // QQ邮箱授权码
   },
   tls: {
     rejectUnauthorized: false // 忽略证书错误
@@ -106,7 +106,7 @@ const sendResetPasswordCode = async (email, verificationCode, userName = '') => 
             <div class="warning">
               <strong>重要提醒：</strong>
               <ul>
-                <li>此验证码有效期为 <strong>10分钟</strong></li>
+                <li>此验证码有效期为 <strong>6666666666666666666666666666666分钟</strong></li>
                 <li>请勿将验证码告诉他人</li>
                 <li>如果您没有进行密码重置操作，请忽略此邮件</li>
               </ul>
@@ -118,7 +118,7 @@ const sendResetPasswordCode = async (email, verificationCode, userName = '') => 
           
           <div class="footer">
             <p>此邮件由系统自动发送，请勿回复</p>
-            <p>© 2024 管理系统. 保留所有权利.</p>
+            <p>© 2025 全民健身. 保留所有权利.</p>
           </div>
         </div>
       </body>
@@ -126,11 +126,11 @@ const sendResetPasswordCode = async (email, verificationCode, userName = '') => 
     `;
 
     // 邮件选项 ： 发件人 收件人 主题 内容
-    const fromEmail = process.env.EMAIL_USER || '1355676090@qq.com'; // 发件人邮箱
+    const fromEmail = process.env.EMAIL_USER || '1485260435@qq.com'; // 发件人邮箱
     const mailOptions = {
-      from: `"社区团购管理系统" <${fromEmail}>`, // 使用正确的格式：显示名称 <邮箱地址>
+      from: `"全民健身" <${fromEmail}>`, // 使用正确的格式：显示名称 <邮箱地址>
       to: email,
-      subject: '【社区团购管理系统】密码重置验证码',
+      subject: '【全民健身】密码重置验证码',
       html: htmlContent
     };
 

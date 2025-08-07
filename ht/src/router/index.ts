@@ -13,6 +13,14 @@ const routes: RouteRecordRaw[] = [
         name: 'Login',
         component: () => import('@/views/txs/Login.vue')
     },
+    
+     {
+        // 找回密码页
+        path: '/resetpwd',
+        name: 'ResetPassword',
+        component: () => import('@/views/txs/ResetPassword.vue')
+    },
+
     {
         // 仪表板/首页
         path: '/dashboard',
@@ -92,7 +100,7 @@ const router = createRouter({
 })
 router.beforeEach((to, _from, next) => {
   document.title = to.meta?.title ? `${to.meta.title} - 全民健身运营管理后台` : '全民健身运营管理后台'
-  const publicPages = ['/login', '/reset-password']
+  const publicPages = ['/login', '/resetpwd']
   const accessToken = localStorage.getItem('accessToken')
   if (!publicPages.includes(to.path) && !accessToken) {
     next('/login')

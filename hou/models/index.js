@@ -156,14 +156,6 @@ let User = new mongoose.Schema({
   userName: String,
   passWord: String,
 });
-
-// 分类表
-let classify = new mongoose.Schema({
-  name: String,
-});
-
-
-
 // 用户表
 let YonghuUser = new mongoose.Schema({
   id: { type: String, required: true, unique: true }, // 用户ID
@@ -192,8 +184,6 @@ let YonghuUser = new mongoose.Schema({
 
 
 
-// 创建移动端相关模型
-let ClassifysModel = mongoose.model("classifys", classify, "classifys");
 
 // 创建 RBAC 相关模型
 let RbacUserModel = mongoose.model("RbacUser", RbacUser, "User_hy");
@@ -217,7 +207,7 @@ module.exports = {
   RolePermissionModel,      // 角色权限关联表
   UserRoleModel,            // 用户角色关联表
   YonghuUserModel,           // 用户表
-  ClassifysModel,            // 商品分类表
+
   UserModel,                  // 登录注册专用表
 
 };

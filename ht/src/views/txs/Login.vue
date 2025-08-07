@@ -264,7 +264,12 @@ const logout = (): void => {
 
 // 处理忘记密码
 const handleForgotPassword = (): void => {
-  router.push('/reset-password')
+  if(!loginForm.username){
+    ElMessage.error('请输入用户名')
+    return
+
+  }
+  router.push('/resetpwd')
 }
 
 // 处理记住密码选择变化
