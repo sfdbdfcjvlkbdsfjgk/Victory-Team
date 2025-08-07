@@ -256,8 +256,8 @@ router.get('/familyforms', async (req, res) => {
             error: error.message
         });
     }
-=======
-const {User,GoodsList,Category}=require('../models/index');
+  });
+
 
 router.post('/login',async (req,res)=>{
   const {username,password}=req.body;
@@ -269,51 +269,51 @@ router.post('/login',async (req,res)=>{
   res.send({code:200,msg:'登录成功',data:user})
 })
 
-router.get('/list',async (req,res)=>{
-  const {type,title,status} = req.query;
-  console.log(type,title,status);
+// router.get('/list',async (req,res)=>{
+//   const {type,title,status} = req.query;
+//   console.log(type,title,status);
   
-  const obj={}
-  if(title){
-    obj.title = new RegExp(title, 'i'); // 'i' 忽略大小写
-  }
+//   const obj={}
+//   if(title){
+//     obj.title = new RegExp(title, 'i'); // 'i' 忽略大小写
+//   }
 
-  // 状态筛选
-  if (status) {
-    if (status === 'onsale') {
-      obj.isHot = true;
-      obj.isDeleted = false;
-      obj.isWarehouse = false;
-      type ? obj.category = type :'' ;
-    }
-    if (status === 'warehouse') {
-      obj.isWarehouse = true;
-      obj.isDeleted = false;
-      type ? obj.category = type :'' ;
-    }
-    if (status === 'ended') {
-      obj.isHot = false;
-      obj.isDeleted = false;
-      obj.isWarehouse = false;
-      type ? obj.category = type :'' ;
-    }
-    if (status === 'alert') {
-      obj.stock = { $lte: 10 };
-      obj.isDeleted = false;
-      type ? obj.category = type :'' ;
-    }
-    if (status === 'recycle') {
-      obj.isDeleted = true;
-      type ? obj.category = type :'' ;
-    }
-  }
-  // console.log(obj);
+//   // 状态筛选
+//   if (status) {
+//     if (status === 'onsale') {
+//       obj.isHot = true;
+//       obj.isDeleted = false;
+//       obj.isWarehouse = false;
+//       type ? obj.category = type :'' ;
+//     }
+//     if (status === 'warehouse') {
+//       obj.isWarehouse = true;
+//       obj.isDeleted = false;
+//       type ? obj.category = type :'' ;
+//     }
+//     if (status === 'ended') {
+//       obj.isHot = false;
+//       obj.isDeleted = false;
+//       obj.isWarehouse = false;
+//       type ? obj.category = type :'' ;
+//     }
+//     if (status === 'alert') {
+//       obj.stock = { $lte: 10 };
+//       obj.isDeleted = false;
+//       type ? obj.category = type :'' ;
+//     }
+//     if (status === 'recycle') {
+//       obj.isDeleted = true;
+//       type ? obj.category = type :'' ;
+//     }
+//   }
+//   // console.log(obj);
   
-  const data=await GoodsList.find(obj);
-  // console.log(data);
+//   const data=await GoodsList.find(obj);
+//   // console.log(data);
   
-  res.send({code:200,data:data});
-})
+//   res.send({code:200,data:data});
+// })
 
 router.post('/update', async (req, res) => {
   const { _id, ids, isHot } = req.body;
@@ -378,10 +378,6 @@ router.get('/api/menu', async (req, res) => {
   ]);
 });
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
->>>>>>> 3abb24d5754c542619de2d8b3b17f9e829702c0e
-});
+
 
 module.exports = router;
