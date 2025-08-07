@@ -626,7 +626,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.registration {
+.banner-sort {
   padding: 20px;
   background: #f5f5f5;
 }

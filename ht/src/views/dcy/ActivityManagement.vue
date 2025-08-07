@@ -729,7 +729,7 @@ const goToRegistration = () => {
 </script>
 
 <style scoped>
-.activity-management {
+.banner-sort {
   padding: 20px;
 }
 
