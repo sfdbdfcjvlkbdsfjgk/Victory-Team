@@ -1,32 +1,3 @@
-<script setup lang="ts">
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-import { User, ArrowDown, Location, Setting, Document, Menu, Collection, PriceTag } from '@element-plus/icons-vue';
-
-const router = useRouter();
-
-
-const handleOpen = (key: string, keyPath: string[]) => {
-  // console.log('Menu clicked:', key, keyPath);
-  // 只有当 key 是有效路由路径时才进行跳转
-  if (key.startsWith('/')) {
-    console.log('Navigating to:', key);
-    router.push(key);
-  }
-};
-
-const showDropdown = ref(false);
-
-const toggleDropdown = () => {
-  showDropdown.value = !showDropdown.value;
-};
-
-const logout = () => {
-  console.log("退出登录");
-  showDropdown.value = false;
-};
-</script>
-
 <template>
   <div class="common-layout">
     <el-container>
@@ -89,50 +60,6 @@ const logout = () => {
             element-loading-text="加载菜单中..."
             @open="handleOpen"
           >
-            <el-sub-menu index="1">
-              <template #title>
-                <el-icon><Location /></el-icon>
-                <span>活动管理</span>
-              </template>
-              <el-menu-item index="/dashboard/activity">活动管理</el-menu-item>
-              <el-menu-item index="/dashboard/activity/publish-normal">发布活动（不含赛事）</el-menu-item>
-              <el-menu-item index="/dashboard/activity/publish-event">发布活动（含赛事）</el-menu-item>
-              <el-menu-item index="/dashboard/activity/create">新增活动</el-menu-item>
-              <el-menu-item index="/dashboard/activity/registration">报名信息查看</el-menu-item>
-            </el-sub-menu>
-            <el-sub-menu index="2">
-              <template #title>
-                <el-icon><Setting /></el-icon>
-                <span>运营位置管理</span>
-              </template>
-              <el-menu-item index="/dashboard/operation">运营位置管理</el-menu-item>
-              <el-menu-item index="/dashboard/operation/banner-create">新建banner运营位</el-menu-item>
-              <el-menu-item index="/dashboard/operation/banner-sort">排序banner位</el-menu-item>
-            </el-sub-menu>
-            <el-menu-item index="/dashboard/account/system">
-              <template #title>
-                <el-icon><Document /></el-icon>
-                <span>账号管理-系统账号管理</span>
-              </template>
-            </el-menu-item>
-            <el-menu-item index="/dashboard/account/role">
-              <template #title>
-                <el-icon><Menu /></el-icon>
-                <span>账号管理-角色管理</span>
-              </template>
-            </el-menu-item>
-            <el-menu-item index="/dashboard/tag-demo">
-              <template #title>
-                <el-icon><Collection /></el-icon>
-                <span>标签展示演示</span>
-              </template>
-            </el-menu-item>
-            <el-menu-item index="/dashboard/tag-test">
-              <template #title>
-                <el-icon><PriceTag /></el-icon>
-                <span>标签测试页面</span>
-              </template>
-            </el-menu-item>
             <!-- 动态渲染菜单 -->
             <template v-for="parent in menuData" :key="parent._id">
               <el-sub-menu :index="parent._id.toString()">
@@ -413,11 +340,6 @@ watch(() => route.path, (newPath) => {
 
 /* 主内容区 */
 .el-main {
-  background-color: #e9eef3;
-  color: #333;
-  text-align: center;
-  /* line-height: calc(100vh - 60px); */
-  padding: 0;
   padding: 20px;
   background-color: #f2f3f5;
   overflow-y: auto;

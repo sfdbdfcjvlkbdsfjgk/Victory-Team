@@ -25,7 +25,7 @@ const routes: RouteRecordRaw[] = [
         // 仪表板/首页
         path: '/dashboard',
         name: 'Dashboard',
-        component: () => import('@/views/Dashboard.vue'),
+        component: () => import('../views/Dashboard.vue'),
         children: [
             {
                 path: 'account/system',

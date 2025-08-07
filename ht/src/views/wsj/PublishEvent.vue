@@ -1696,29 +1696,29 @@ const resetForm = () => {
 }
 
 // 初始化运动标签
-const initSportTags = async () => {
-  try {
-    const response = await axios.get('/wsj/getlabel')
-    if (response.data && response.data.code === 200) {
-      // 将后端返回的标签数据转换为下拉框需要的格式
-      // 根据后端返回的数据结构进行调整
-      const tags = response.data.data || []
-      sportTags.value = tags.map((tag: any) => ({
-        label: tag.sport_tag || tag,
-        value: tag.sport_tag || tag
-      }))
-    } else {
-      console.error('获取运动标签失败:', response.data?.msg || '未知错误')
-      sportTags.value = []
-    }
-  } catch (error: any) {
-    console.error('获取运动标签失败:', error.response?.data?.msg || error.message)
-    sportTags.value = []
-  }
-}
+// const initSportTags = async () => {
+//   try {
+//     const response = await axios.get('/wsj/getlabel')
+//     if (response.data && response.data.code === 200) {
+//       // 将后端返回的标签数据转换为下拉框需要的格式
+//       // 根据后端返回的数据结构进行调整
+//       const tags = response.data.data || []
+//       sportTags.value = tags.map((tag: any) => ({
+//         label: tag.sport_tag || tag,
+//         value: tag.sport_tag || tag
+//       }))
+//     } else {
+//       console.error('获取运动标签失败:', response.data?.msg || '未知错误')
+//       sportTags.value = []
+//     }
+//   } catch (error: any) {
+//     console.error('获取运动标签失败:', error.response?.data?.msg || error.message)
+//     sportTags.value = []
+//   }
+// }
 
 onMounted(() => {
-  initSportTags()
+  // initSportTags()
   getProvinces()
   
   // 初始化限制值

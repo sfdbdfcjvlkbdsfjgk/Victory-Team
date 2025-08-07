@@ -1,4 +1,34 @@
 let mongoose = require("mongoose");
+// 添加更详细的连接日志
+mongoose.connection.on("connected", () => {
+  console.log("MongoDB connected successfully");
+});
+
+mongoose.connection.on("error", (err) => {
+  console.log("MongoDB connection error:", err);
+});
+
+mongoose.connection.on("disconnected", () => {
+  console.log("MongoDB disconnected");
+});
+
+mongoose
+  .connect(
+    "mongodb+srv://yy2935140484:439952014710q@cluster0.kuvzpp4.mongodb.net/sport",
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 10000
+    }
+  )
+  .then(() => {
+    console.log("数据库连接成功！");
+  })
+  .catch((err) => {
+    console.log("数据库连接失败:", err);
+  });
+
+
 
 const activitymanageSchema = new mongoose.Schema({
     id: String,
@@ -44,47 +74,21 @@ const activitySchema = new mongoose.Schema({
 
     formFields: Array, // 报名表单信息
 
-    state: String,//发布状态
-// 添加更详细的连接日志
-// mongoose.connection.on("connected", () => {
-//   console.log("MongoDB connected successfully");
-// });
+    state: String//发布状态
+})
 
-// mongoose.connection.on("error", (err) => {
-//   console.log("MongoDB connection error:", err);
-// });
-
-// mongoose.connection.on("disconnected", () => {
-//   console.log("MongoDB disconnected");
-// });
-
-// mongoose
-//   .connect(
-//     "mongodb+srv://yy2935140484:439952014710q@cluster0.kuvzpp4.mongodb.net/sport",
-//     {
-//       useNewUrlParser: true,
-//       useUnifiedTopology: true,
-//       serverSelectionTimeoutMS: 10000
-//     }
-//   )
-//   .then(() => {
-//     console.log("数据库连接成功！");
-//   })
-//   .catch((err) => {
-//     console.log("数据库连接失败:", err);
-//   });
 
 // ======RBAC 系统相关表结构======
 
 // RBAC 用户表
-  let RbacUser = new mongoose.Schema({
+let RbacUser = new mongoose.Schema({
   _id: { type: String, required: true },           // 用户ID（字符串类型）
-  userName: {type: String, required: true, unique: true},    // 用户名
-  passWord: {type: String, required: true},         // 密码
-  realName: {type: String, required: true},         // 真实姓名
-  email: {type: String, required: true},            // 邮箱
-  phone: {type: String, required: true},            // 手机号
-  status: {                // 状态: active-启用, inactive-禁用
+  userName: {type: String, required: true, unique: true},        // 用户名
+  passWord: {type: String, required: true},        // 密码
+  realName: {type: String, required: true},        // 真实姓名
+  email: {type: String, required: true},           // 邮箱
+  phone: {type: String, required: true},           // 手机号
+  status: {                // 状态：active-启用，inactive-禁用
     type: String,
     default: 'active',
     enum: ['active', 'inactive']
@@ -106,6 +110,7 @@ const activitySchema = new mongoose.Schema({
     default: null
   },
 });
+
 
 // 权限表
 let Permission = new mongoose.Schema({
@@ -192,7 +197,7 @@ let UserRole = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
-});
+})
 
 // ======移动端相关表结构======
 
@@ -226,7 +231,6 @@ let YonghuUser = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 })
 
-})
 const activityEvent = mongoose.model('activityEvent', activitySchema, 'activityEvent')
 //前端添加的活动赛事数据团队的
 const teamFormSchema = new mongoose.Schema({
