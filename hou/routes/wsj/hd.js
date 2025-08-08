@@ -267,7 +267,7 @@ router.get('/ss/:activityId',async(req,res)=>{
 //团队添加活动人员表单
 router.post('/register/team',async(req,res)=>{
   const aaa=req.body;
-  // console.log('接收到的数据:', aaa);
+  console.log('接收到的数据:', aaa);
   
   // 确保包含activityId
   if (!aaa.activityId) {
@@ -314,7 +314,7 @@ router.post('/register/team',async(req,res)=>{
 router.post('/register/individual',async(req,res)=>{
   const aaa=req.body;
   // console.log('接收到的数据:', aaa);
-  console.log(req.body,1111111)
+  console.log(req.body,1343567)
   
   const data=new individualForm(aaa);
   await data.save();
@@ -340,6 +340,22 @@ router.post('/register/family',async(req,res)=>{
       });
     }
     
+    // 验证和结构化members数据
+    if (aaa.members && Array.isArray(aaa.members)) {
+      aaa.members = aaa.members.map(member => {
+        // 确保每个成员对象都有正确的结构
+        return {
+          name: member['姓名'] || member.name || '',
+          phone: member['手机号'] || member.phone || '',
+          idCard: member['证件类型/证件号'] || member.idCard || '',
+          age: member['年龄'] || member.age || '',
+          gender: member['性别'] || member.gender || '',
+          emergencyContact: member['紧急联系人'] || member.emergencyContact || '',
+          cost: member['费用'] || member.cost || ''
+        };
+      });
+    }
+    
     // 验证members数组
     if (!aaa.members || !Array.isArray(aaa.members) || aaa.members.length === 0) {
       return res.status(400).send({
@@ -352,7 +368,14 @@ router.post('/register/family',async(req,res)=>{
     for (let i = 0; i < aaa.members.length; i++) {
       const member = aaa.members[i];
       
-      if (!member['姓名'] || !member['手机号'] || !member['证件类型/证件号'] || !member['年龄限制'] || !member['性别限制']) {
+      // 支持中文字段名和英文字段名
+      const name = member['姓名'] || member.name;
+      const phone = member['手机号'] || member.phone;
+      const idCard = member['证件类型/证件号'] || member.idCard;
+      const age = member['年龄'] || member.age;
+      const gender = member['性别'] || member.gender;
+      
+      if (!name || !phone || !idCard || !age || !gender) {
         return res.status(400).send({
           code: 400,
           msg: `第${i + 1}个成员信息不完整，请填写所有必填项`
@@ -394,6 +417,9 @@ router.post('/register/family',async(req,res)=>{
     });
   }
 })
+
+
+
 
 
 

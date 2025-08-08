@@ -8,8 +8,10 @@ var fileUpload = require('express-fileupload');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var wsjRouter = require('./routes/wsj/hd');
+var videosRouter = require('./routes/api/videos');
+var uploadRouter = require('./routes/api/upload');
+var chunkUploadRouter = require('./routes/api/chunkUpload');
 
-var txsRouter=require('./routes/txs')
 var cors = require('cors');
 var app = express();
 app.use(cors());
@@ -29,12 +31,27 @@ app.use(fileUpload({
   }
 }));
 
-app.use(express.static(path.join(__dirname, 'public')));
+// 静态文件服务配置
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, path, stat) => {
+    if (path.endsWith('.mp4')) {
+      res.set({
+        'Content-Type': 'video/mp4',
+        'Accept-Ranges': 'bytes',
+        'Cache-Control': 'public, max-age=3600'
+      });
+    }
+  }
+}));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/wsj', wsjRouter);
-app.use('/txs',txsRouter)
+app.use('/api', videosRouter);
+app.use('/api', uploadRouter);
+app.use('/api', chunkUploadRouter);
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -10,7 +10,8 @@ export const ROUTES = {
   SPORTS: '/sports',
   BOOKING: '/booking',
   PROFILE: '/profile',
-  PROFILE_SETTINGS: '/profile/settings'
+  // PROFILE_SETTINGS: '/profile/settings',
+  // FITNESS_TUTORIAL: '/fitness-tutorial'
 } as const;
 
 // 路由元信息类型
@@ -57,6 +58,11 @@ export const ROUTE_METADATA: Record<string, RouteMetadata> = {
   },
   [ROUTES.PREFERENCES]: {
     title: '喜好选择'
-  }
+  },
+  // [ROUTES.FITNESS_TUTORIAL]: {
+  //   title: '健身教程',
+  //   showInBottomNav: true,
+  //   icon: '💪'
+  // }
 };
 

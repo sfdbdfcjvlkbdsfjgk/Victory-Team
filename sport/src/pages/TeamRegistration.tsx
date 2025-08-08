@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import { validateTeamForm, validateField } from '../utils/validation';
+import { validateTeamForm, validateField, validateName, validatePhone, validateTeamName, validateEmail, validateTeamDescription } from '../utils/validation';
 
 interface FormField {
   fieldName: string;
@@ -9,6 +9,22 @@ interface FormField {
   type: string;
   hintText: string;
   isSystem: boolean;
+}
+
+interface RegistrationItem {
+  itemName: string;
+  cost: number;
+  maxPeople: number;
+  requireInsurance: boolean;
+  consultationPhone: string;
+}
+
+interface ActivityData {
+  _id?: string;
+  id?: string;
+  title?: string;
+  name?: string;
+  registrationItems?: RegistrationItem[];
 }
 
 interface AgeRestriction {
@@ -38,6 +54,7 @@ export default function TeamRegistration() {
   const [searchParams] = useSearchParams();
   const selectedItem = searchParams.get('itemId');
   
+  const [activity, setActivity] = useState<ActivityData | null>(null);
   const [formData, setFormData] = useState<TeamInfo>({
     teamName: '',
     teamLeader: '',
@@ -52,6 +69,15 @@ export default function TeamRegistration() {
   const [fieldsLoading, setFieldsLoading] = useState(true);
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const [memberErrors, setMemberErrors] = useState<{ [key: string]: { [memberIndex: number]: string } }>({});
+  const [maxPeopleMessage, setMaxPeopleMessage] = useState<string>('');
+  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | 'warning' } | null>(null);
+
+  const showMessage = (text: string, type: 'success' | 'error' | 'warning') => {
+    setMessage({ text, type });
+    setTimeout(() => {
+      setMessage(null);
+    }, 3000);
+  };
 
   const handleInputChange = (field: keyof Omit<TeamInfo, 'members'>, value: string) => {
     setFormData(prev => ({
@@ -60,7 +86,21 @@ export default function TeamRegistration() {
     }));
     
     // 实时校验字段
-    const validation = validateField(field, value);
+    let validation;
+    if (field === 'teamLeader') {
+      validation = validateName(value);
+    } else if (field === 'teamLeaderPhone') {
+      validation = validatePhone(value);
+    } else if (field === 'teamName') {
+      validation = validateTeamName(value);
+    } else if (field === 'contactEmail') {
+      validation = validateEmail(value);
+    } else if (field === 'teamDescription') {
+      validation = validateTeamDescription(value);
+    } else {
+      validation = validateField(field, value);
+    }
+    
     if (validation.isValid) {
       setFieldErrors(prev => {
         const newErrors = { ...prev };
@@ -108,17 +148,50 @@ export default function TeamRegistration() {
   };
 
   const addMember = () => {
+    // 获取选中项目的最大人数限制
+    let selectedItemData = activity?.registrationItems?.find((item: RegistrationItem) => item.itemName === selectedItem);
+    
+    // 如果没有找到匹配的项目，使用第一个项目
+    if (!selectedItemData && activity?.registrationItems && activity.registrationItems.length > 0) {
+      selectedItemData = activity.registrationItems[0];
+    }
+    
+    // 检查是否超过最大人数限制
+    const maxPeople = selectedItemData?.maxPeople || 10; // 默认10人
+    if (formData.members.length >= maxPeople) {
+      setMaxPeopleMessage(`最多只能添加${maxPeople}个成员`);
+      // 3秒后清除提示信息
+      setTimeout(() => {
+        setMaxPeopleMessage('');
+      }, 3000);
+      return;
+    }
+    
+    // 清除之前的提示信息
+    setMaxPeopleMessage('');
+    
     // 获取当前表单字段中的性别默认值
     const genderField = formFields.find((field: FormField) => field.type === 'gender-restriction');
     const defaultGender = genderField?.hintText || '男';
+    
+    // 创建新成员，为每个字段设置默认值
+    const newMember: TeamMember = {};
+    formFields.forEach((field: FormField) => {
+      if (field.type === 'gender-restriction') {
+        newMember[field.fieldName] = defaultGender;
+      } else if (field.type === 'age-restriction') {
+        const minAge = ageRestrictions.length > 0 ? ageRestrictions[0].minAge : 18;
+        newMember[field.fieldName] = minAge.toString();
+      } else {
+        newMember[field.fieldName] = '';
+      }
+    });
     
     setFormData(prev => ({
       ...prev,
       members: [
         ...prev.members,
-        {
-          '性别': defaultGender // 使用后端返回的默认性别
-        }
+        newMember
       ]
     }));
   };
@@ -136,6 +209,18 @@ export default function TeamRegistration() {
         const data = response.data.data;
         console.log('后端返回的表单字段:', data.formFields);
         console.log('后端返回的年龄限制:', data.registrantAgeRestriction);
+        
+        // 详细检查后端返回的字段配置
+        if (data.formFields) {
+          data.formFields.forEach((field: any, index: number) => {
+            console.log(`后端字段${index + 1}:`, {
+              fieldName: field.fieldName,
+              type: field.type,
+              required: field.required,
+              hintText: field.hintText
+            });
+          });
+        }
         
         // 解析年龄限制字符串
         let parsedAgeRestrictions = data.registrantAgeRestriction || [];
@@ -160,17 +245,89 @@ export default function TeamRegistration() {
         
         console.log('解析后的年龄限制:', parsedAgeRestrictions);
         console.log('完整的后端数据:', data);
-        setFormFields(data.formFields || []);
+        
+        // 如果后端没有返回formFields或为空，使用默认字段
+        let fields = data.formFields || [];
+        if (fields.length === 0) {
+          fields = [
+            {
+              fieldName: "姓名",
+              required: true,
+              type: "text",
+              hintText: "请输入姓名",
+              isSystem: true
+            },
+            {
+              fieldName: "手机号",
+              required: true,
+              type: "text",
+              hintText: "请输入手机号",
+              isSystem: true
+            },
+            {
+              fieldName: "证件类型/证件号",
+              required: true,
+              type: "text",
+              hintText: "请输入证件号",
+              isSystem: true
+            },
+            {
+              fieldName: "紧急联系人",
+              required: false,
+              type: "text",
+              hintText: "紧急电话",
+              isSystem: false
+            },
+            {
+              fieldName: "年龄",
+              required: true,
+              type: "age-restriction",
+              hintText: "18-60岁",
+              isSystem: true
+            },
+            {
+              fieldName: "性别",
+              required: true,
+              type: "gender-restriction",
+              hintText: "男",
+              isSystem: true
+            }
+          ];
+        }
+        
+        setFormFields(fields);
         setAgeRestrictions(parsedAgeRestrictions);
         
+        // 设置活动数据
+        setActivity(data);
+        console.log('设置的活动数据:', data);
+        console.log('活动数据中的registrationItems:', data.registrationItems);
+        
         // 初始化团队成员数据，设置性别默认值
-        const genderField = data.formFields?.find((field: FormField) => field.type === 'gender-restriction');
+        const genderField = fields.find((field: FormField) => field.type === 'gender-restriction');
         const defaultGender = genderField?.hintText || '男';
         console.log('后端返回的性别字段:', genderField);
         console.log('设置的默认性别:', defaultGender);
-        const initialMembers = [{
-          '性别': defaultGender
-        }];
+        
+        // 初始化成员数据，为每个字段设置默认值
+        console.log('初始化成员数据，字段配置:', fields);
+        const initialMembers: TeamMember[] = [{}];
+        fields.forEach((field: FormField) => {
+          console.log(`初始化字段: ${field.fieldName}, 类型: ${field.type}, 必填: ${field.required}`);
+          if (field.type === 'gender-restriction') {
+            initialMembers[0][field.fieldName] = defaultGender;
+            console.log(`设置性别字段 ${field.fieldName} = "${defaultGender}"`);
+          } else if (field.type === 'age-restriction') {
+            const minAge = parsedAgeRestrictions.length > 0 ? parsedAgeRestrictions[0].minAge : 18;
+            initialMembers[0][field.fieldName] = minAge.toString();
+            console.log(`设置年龄字段 ${field.fieldName} = "${minAge}"`);
+          } else {
+            initialMembers[0][field.fieldName] = '';
+            console.log(`设置文本字段 ${field.fieldName} = ""`);
+          }
+        });
+        console.log('初始化后的成员数据:', initialMembers);
+        
         setFormData(prev => ({
           ...prev,
           members: initialMembers
@@ -178,48 +335,48 @@ export default function TeamRegistration() {
       } else {
         // 如果后端没有返回数据，使用默认字段
         const defaultFormFields: FormField[] = [
-          // {
-          //   fieldName: "姓名",
-          //   required: true,
-          //   type: "text",
-          //   hintText: "请输入姓名",
-          //   isSystem: true
-          // },
-          // {
-          //   fieldName: "手机号",
-          //   required: true,
-          //   type: "text",
-          //   hintText: "请输入手机号",
-          //   isSystem: true
-          // },
-          // {
-          //   fieldName: "证件类型/证件号",
-          //   required: true,
-          //   type: "text",
-          //   hintText: "请输入证件号",
-          //   isSystem: true
-          // },
-          // {
-          //   fieldName: "紧急联系人",
-          //   required: true,
-          //   type: "text",
-          //   hintText: "紧急电话",
-          //   isSystem: false
-          // },
-          // {
-          //   fieldName: "年龄限制",
-          //   required: true,
-          //   type: "age-restriction",
-          //   hintText: "",
-          //   isSystem: true
-          // },
-          // {
-          //   fieldName: "性别限制",
-          //   required: true,
-          //   type: "gender-restriction",
-          //   hintText: "",
-          //   isSystem: true
-          // }
+          {
+            fieldName: "姓名",
+            required: true,
+            type: "text",
+            hintText: "请输入姓名",
+            isSystem: true
+          },
+          {
+            fieldName: "手机号",
+            required: true,
+            type: "text",
+            hintText: "请输入手机号",
+            isSystem: true
+          },
+          {
+            fieldName: "证件类型/证件号",
+            required: true,
+            type: "text",
+            hintText: "请输入证件号",
+            isSystem: true
+          },
+          {
+            fieldName: "紧急联系人",
+            required: false,
+            type: "text",
+            hintText: "紧急电话",
+            isSystem: false
+          },
+          {
+            fieldName: "年龄",
+            required: true,
+            type: "age-restriction",
+            hintText: "18-60岁",
+            isSystem: true
+          },
+          {
+            fieldName: "性别",
+            required: true,
+            type: "gender-restriction",
+            hintText: "男",
+            isSystem: true
+          }
         ];
         
         setFormFields(defaultFormFields);
@@ -227,7 +384,12 @@ export default function TeamRegistration() {
         
         // 初始化团队成员数据，设置性别默认值
         const initialMembers = [{
-          '性别': '男' // 默认值
+          '姓名': '',
+          '手机号': '',
+          '证件类型/证件号': '',
+          '紧急联系人': '',
+          '年龄': '18',
+          '性别': '男'
         }];
         setFormData(prev => ({
           ...prev,
@@ -239,48 +401,48 @@ export default function TeamRegistration() {
       console.error('获取表单字段失败:', error);
       // 出错时使用默认字段
       const defaultFormFields: FormField[] = [
-        // {
-        //   fieldName: "姓名",
-        //   required: true,
-        //   type: "text",
-        //   hintText: "请输入姓名",
-        //   isSystem: true
-        // },
-        // {
-        //   fieldName: "手机号",
-        //   required: true,
-        //   type: "text",
-        //   hintText: "请输入手机号",
-        //   isSystem: true
-        // },
-        // {
-        //   fieldName: "证件类型/证件号",
-        //   required: true,
-        //   type: "text",
-        //   hintText: "请输入证件号",
-        //   isSystem: true
-        // },
-        // {
-        //   fieldName: "紧急联系人",
-        //   required: true,
-        //   type: "text",
-        //   hintText: "紧急电话",
-        //   isSystem: false
-        // },
-        // {
-        //   fieldName: "年龄限制",
-        //   required: true,
-        //   type: "age-restriction",
-        //   hintText: "",
-        //   isSystem: true
-        // },
-        // {
-        //   fieldName: "性别限制",
-        //   required: true,
-        //   type: "gender-restriction",
-        //   hintText: "",
-        //   isSystem: true
-        // }
+        {
+          fieldName: "姓名",
+          required: true,
+          type: "text",
+          hintText: "请输入姓名",
+          isSystem: true
+        },
+        {
+          fieldName: "手机号",
+          required: true,
+          type: "text",
+          hintText: "请输入手机号",
+          isSystem: true
+        },
+        {
+          fieldName: "证件类型/证件号",
+          required: true,
+          type: "text",
+          hintText: "请输入证件号",
+          isSystem: true
+        },
+        {
+          fieldName: "紧急联系人",
+          required: false,
+          type: "text",
+          hintText: "紧急电话",
+          isSystem: false
+        },
+        {
+          fieldName: "年龄",
+          required: true,
+          type: "age-restriction",
+          hintText: "18-60岁",
+          isSystem: true
+        },
+        {
+          fieldName: "性别",
+          required: true,
+          type: "gender-restriction",
+          hintText: "男",
+          isSystem: true
+        }
       ];
       
       setFormFields(defaultFormFields);
@@ -288,7 +450,12 @@ export default function TeamRegistration() {
       
       // 初始化团队成员数据，设置性别默认值
       const initialMembers = [{
-        '性别': '男' // 默认值
+        '姓名': '',
+        '手机号': '',
+        '证件类型/证件号': '',
+        '紧急联系人': '',
+        '年龄': '18',
+        '性别': '男'
       }];
       setFormData(prev => ({
         ...prev,
@@ -320,49 +487,175 @@ export default function TeamRegistration() {
   };
 
   const handleSubmit = async () => {
+    console.log('handleSubmit 被调用');
+    console.log('当前表单数据:', formData);
+    console.log('当前表单字段:', formFields);
+    
     // 使用新的校验函数
     const validation = validateTeamForm(formData, formData.members, formFields, {
       ageRestrictions
     });
     
+    console.log('验证结果:', validation);
+    
     if (!validation.isValid) {
-      // 将验证错误映射到字段错误状态，不使用弹窗
+      console.log('表单验证失败，错误信息:', validation.errors);
+      // 显示错误消息给用户
+      showMessage(`表单验证失败: ${validation.errors.join(', ')}`, 'error');
+      
+      // 将验证错误映射到字段错误状态
       const newFieldErrors: { [key: string]: string } = {};
+      const newMemberErrors: { [key: string]: { [memberIndex: number]: string } } = {};
+      
       validation.errors.forEach(error => {
+        console.log('处理错误:', error);
         // 处理团队基本信息字段错误
-        if (error.includes('团队负责人') || error.includes('teamLeader')) {
-          newFieldErrors['teamLeader'] = error;
-        } else if (error.includes('负责人电话') || error.includes('teamLeaderPhone')) {
-          newFieldErrors['teamLeaderPhone'] = error;
-        } else if (error.includes('团队名称') || error.includes('teamName')) {
-          newFieldErrors['teamName'] = error;
-        } else if (error.includes('联系邮箱') || error.includes('contactEmail')) {
-          newFieldErrors['contactEmail'] = error;
-        } else if (error.includes('团队简介') || error.includes('teamDescription')) {
-          newFieldErrors['teamDescription'] = error;
+        if (error.includes('团队负责人')) {
+          newFieldErrors['teamLeader'] = '请填写团队负责人';
+        } else if (error.includes('负责人电话')) {
+          newFieldErrors['teamLeaderPhone'] = '请填写负责人电话';
+        } else if (error.includes('团队名称')) {
+          newFieldErrors['teamName'] = error.replace('团队名称: ', '');
+        } else if (error.includes('联系邮箱')) {
+          newFieldErrors['contactEmail'] = error.replace('联系邮箱: ', '');
+        } else if (error.includes('团队简介')) {
+          newFieldErrors['teamDescription'] = error.replace('团队简介: ', '');
+        } else if (error.includes('成员')) {
+          // 处理成员错误
+          const memberMatch = error.match(/成员(\d+):\s*(.+)/);
+          if (memberMatch) {
+            const memberIndex = parseInt(memberMatch[1]) - 1;
+            const errorMessage = memberMatch[2];
+            
+            // 根据错误消息确定字段名
+            let fieldName = '';
+            if (errorMessage.includes('姓名')) {
+              fieldName = formFields.find(f => f.fieldName.includes('姓名'))?.fieldName || '姓名';
+            } else if (errorMessage.includes('手机')) {
+              fieldName = formFields.find(f => f.fieldName.includes('手机'))?.fieldName || '手机号';
+            } else if (errorMessage.includes('证件')) {
+              fieldName = formFields.find(f => f.fieldName.includes('证件') || f.fieldName.includes('身份证'))?.fieldName || '证件类型/证件号';
+            } else if (errorMessage.includes('年龄')) {
+              fieldName = formFields.find(f => f.fieldName.includes('年龄'))?.fieldName || '年龄';
+            } else if (errorMessage.includes('性别')) {
+              fieldName = formFields.find(f => f.fieldName.includes('性别'))?.fieldName || '性别';
+            }
+            
+            if (fieldName) {
+              if (!newMemberErrors[fieldName]) {
+                newMemberErrors[fieldName] = {};
+              }
+              newMemberErrors[fieldName][memberIndex] = errorMessage;
+            }
+          }
         }
-        // 团队成员错误会在成员部分单独处理
       });
+      
+      console.log('设置的字段错误:', newFieldErrors);
+      console.log('设置的成员错误:', newMemberErrors);
+      
       setFieldErrors(newFieldErrors);
+      setMemberErrors(newMemberErrors);
       return;
     }
 
     setLoading(true);
     try {
+      console.log('开始处理提交数据');
+      
+      // 额外检查：确保所有必填字段都已填写
+      const emptyRequiredFields: string[] = [];
+      formData.members.forEach((member, memberIndex) => {
+        console.log(`检查成员${memberIndex + 1}的必填字段:`);
+        formFields.forEach(field => {
+          if (field.required) {
+            const value = member[field.fieldName];
+            console.log(`  ${field.fieldName}: "${value}" (必填: ${field.required})`);
+            if (!value || value.trim() === '') {
+              emptyRequiredFields.push(`成员${memberIndex + 1}的${field.fieldName}`);
+            }
+          }
+        });
+      });
+      
+      if (emptyRequiredFields.length > 0) {
+        showMessage(`请填写以下必填字段: ${emptyRequiredFields.join(', ')}`, 'error');
+        setLoading(false);
+        return;
+      }
+      
       // 处理团队成员数据，确保字段名正确
-      const processedMembers = formData.members.map(member => {
-        const processedMember = {
-          name: member['姓名'] || '',
-          phone: member['手机号'] || '',
-          idCard: member['证件类型/证件号'] || '',
-          emergencyContact: member['紧急联系人'] || '',
-          age: member['年龄'] || '',
-          gender: member['性别'] || ''
-        };
+      console.log('提交前的formData.members:', formData.members);
+      console.log('当前的formFields:', formFields);
+      
+      // 详细检查每个成员的字段值
+      formData.members.forEach((member, memberIndex) => {
+        console.log(`=== 成员${memberIndex + 1} 详细数据 ===`);
+        Object.keys(member).forEach(key => {
+          console.log(`${key}: "${member[key]}" (类型: ${typeof member[key]})`);
+        });
+      });
+      
+      const processedMembers = formData.members.map((member, index) => {
+        console.log(`处理成员${index + 1}:`, member);
+        const processedMember: any = {};
+        
+        // 动态处理所有字段
+        formFields.forEach(field => {
+          const value = member[field.fieldName];
+          console.log(`字段 ${field.fieldName}: 原始值 = "${value}", 类型 = ${typeof value}`);
+          
+          // 字段名映射：将中文字段名映射到英文字段名
+          let mappedFieldName = field.fieldName;
+          if (field.fieldName === '姓名') {
+            mappedFieldName = 'name';
+          } else if (field.fieldName === '手机号') {
+            mappedFieldName = 'phone';
+          } else if (field.fieldName === '证件类型/证件号' || field.fieldName === '身份证') {
+            mappedFieldName = 'idCard';
+          } else if (field.fieldName === '紧急联系人') {
+            mappedFieldName = 'emergencyContact';
+          } else if (field.fieldName === '年龄' || field.fieldName === '年龄限制') {
+            mappedFieldName = 'age';
+          } else if (field.fieldName === '性别' || field.fieldName === '性别限制') {
+            mappedFieldName = 'gender';
+          }
+          
+          console.log(`字段映射: ${field.fieldName} -> ${mappedFieldName}`);
+          
+          // 确保值不为undefined或null
+          const finalValue = value !== undefined && value !== null ? value : '';
+          console.log(`最终值: "${finalValue}"`);
+          
+          if (field.type === 'gender-restriction') {
+            processedMember[mappedFieldName] = finalValue; // 直接使用中文值：男/女
+          } else {
+            processedMember[mappedFieldName] = finalValue;
+          }
+        });
+        
+        // 确保所有必需字段都存在，即使后端没有返回
+        if (!processedMember.hasOwnProperty('emergencyContact')) {
+          processedMember.emergencyContact = '';
+          console.log('添加默认的emergencyContact字段');
+        }
+        
+        console.log(`处理后的成员${index + 1}:`, processedMember);
         return processedMember;
       });
+      
+      console.log('处理后的成员数据:', processedMembers);
 
-      const submitData = {
+      // 获取选中项目的cost值
+      let selectedItemData = activity?.registrationItems?.find((item: RegistrationItem) => item.itemName === selectedItem);
+      
+      // 如果没有找到匹配的项目，使用第一个项目
+      if (!selectedItemData && activity?.registrationItems && activity.registrationItems.length > 0) {
+        selectedItemData = activity.registrationItems[0];
+      }
+
+      // 构建提交数据
+      const submitData: any = {
         activityId,
         selectedItem,
         teamName: formData.teamName,
@@ -372,10 +665,39 @@ export default function TeamRegistration() {
         contactEmail: formData.contactEmail,
         members: processedMembers
       };
+      
+              // 添加报名费到每个成员
+        if (selectedItemData && selectedItemData.cost !== null && selectedItemData.cost !== undefined && selectedItemData.cost !== 0) {
+          submitData.members.forEach((member: any) => {
+            member['cost'] = selectedItemData.cost.toString(); // 映射为后端期望的字段名
+          });
+          console.log('将cost字段添加到每个成员的formData:', selectedItemData.cost);
+        }
+      
+      console.log('活动数据:', activity);
+      console.log('选中的项目名称:', selectedItem);
+      console.log('找到的选中项目数据:', selectedItemData);
 
       console.log('提交的数据:', submitData);
+      console.log('最终提交的数据结构:', JSON.stringify(submitData, null, 2));
+      
+      // 特别检查members数组的数据
+      console.log('Members数组详情:');
+      submitData.members.forEach((member: any, index: number) => {
+        console.log(`成员${index + 1}:`, {
+          name: member.name,
+          phone: member.phone,
+          idCard: member.idCard,
+          emergencyContact: member.emergencyContact,
+          age: member.age,
+          gender: member.gender,
+          cost: member.cost
+        });
+      });
 
+      console.log('开始发送网络请求...');
       const response = await axios.post(`http://localhost:3000/wsj/register/team`, submitData);
+      console.log('网络请求响应:', response.data);
       
       if (response.data.code === 200) {
         // 检查是否会超过最大值
@@ -387,7 +709,7 @@ export default function TeamRegistration() {
         const maxRegistered = 10; // 这里应该从活动详情获取
         
         if (newCount > maxRegistered) {
-          alert('报名人数已满，无法继续报名！');
+          showMessage('报名人数已满，无法继续报名！', 'error');
           navigate(`/activity-detail/${activityId}`);
           return;
         }
@@ -405,14 +727,25 @@ export default function TeamRegistration() {
         
         window.dispatchEvent(event);
         
-        alert('团队报名成功！');
+        showMessage('团队报名成功！', 'success');
         navigate(`/activity-detail/${activityId}`);
       } else {
-        alert(response.data.msg || '报名失败');
+        showMessage(response.data.msg || '报名失败', 'error');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('报名失败:', error);
-      alert('报名失败，请稍后重试');
+      console.error('错误详情:', error);
+      if (error.response) {
+        console.error('错误响应:', error.response.data);
+        console.error('错误状态:', error.response.status);
+        showMessage(`报名失败: ${error.response.data?.msg || error.response.data?.message || '网络错误'}`, 'error');
+      } else if (error.request) {
+        console.error('请求错误:', error.request);
+        showMessage('报名失败: 网络连接错误，请检查网络', 'error');
+      } else {
+        console.error('其他错误:', error.message);
+        showMessage('报名失败: 请稍后重试', 'error');
+      }
     } finally {
       setLoading(false);
     }
@@ -460,6 +793,21 @@ export default function TeamRegistration() {
           团队报名
         </h2>
       </div>
+
+      {/* 消息提示 */}
+      {message && (
+        <div style={{
+          backgroundColor: message.type === 'success' ? '#f6ffed' : message.type === 'error' ? '#fff2f0' : '#fff7e6',
+          border: message.type === 'success' ? '1px solid #b7eb8f' : message.type === 'error' ? '1px solid #ffccc7' : '1px solid #ffd591',
+          borderRadius: '6px',
+          padding: '8px 12px',
+          marginBottom: '15px',
+          fontSize: '12px',
+          color: message.type === 'success' ? '#52c41a' : message.type === 'error' ? '#ff4d4f' : '#faad14'
+        }}>
+          {message.text}
+        </div>
+      )}
 
       {/* 已选择项目提示 */}
       {selectedItem && (
@@ -733,6 +1081,21 @@ export default function TeamRegistration() {
               + 添加成员
             </button>
           </div>
+          
+          {/* 最大人数提示信息 */}
+          {maxPeopleMessage && (
+            <div style={{
+              backgroundColor: '#fff2e8',
+              border: '1px solid #ffbb96',
+              borderRadius: '6px',
+              padding: '8px 12px',
+              marginBottom: '15px',
+              fontSize: '12px',
+              color: '#d46b08'
+            }}>
+              {maxPeopleMessage}
+            </div>
+          )}
 
           {/* 年龄限制提示 - 只在有年龄限制且不在表单字段中时显示 */}
           {ageRestrictions.length > 0 && !formFields.some(field => field.type === 'age-restriction') && (
@@ -790,7 +1153,7 @@ export default function TeamRegistration() {
                 if (field.type === 'age-restriction') {
                   const minAge = ageRestrictions.length > 0 ? ageRestrictions[0].minAge : 12;
                   const maxAge = ageRestrictions.length > 0 ? ageRestrictions[0].maxAge : 60;
-                  const currentAge = parseInt(member['年龄'] || minAge.toString());
+                  const currentAge = parseInt(member[field.fieldName] || minAge.toString());
                   
                   return (
                     <div key={fieldIndex} style={{ marginBottom: '10px' }}>
@@ -801,7 +1164,8 @@ export default function TeamRegistration() {
                         color: '#666',
                         fontWeight: '500'
                       }}>
-                        年龄 {field.required && <span style={{ color: 'red' }}>*</span>}
+                        {field.fieldName} {field.required && <span style={{ color: 'red', fontWeight: 'bold' }}>*</span>}
+                        {field.required && <span style={{ fontSize: '10px', color: '#999', marginLeft: '4px' }}>(必填)</span>}
                       </label>
                       
                       {/* 年龄选择器 */}
@@ -817,7 +1181,7 @@ export default function TeamRegistration() {
                         <span style={{ fontSize: '12px', color: '#666' }}>年龄:</span>
                         <select
                           value={currentAge}
-                          onChange={(e) => handleMemberChange(index, '年龄', e.target.value)}
+                          onChange={(e) => handleMemberChange(index, field.fieldName, e.target.value)}
                           style={{
                             padding: '8px',
                             border: '1px solid #ddd',
@@ -877,7 +1241,8 @@ export default function TeamRegistration() {
                         color: '#666',
                         fontWeight: '500'
                       }}>
-                        性别 {field.required && <span style={{ color: 'red' }}>*</span>}
+                        {field.fieldName} {field.required && <span style={{ color: 'red', fontWeight: 'bold' }}>*</span>}
+                        {field.required && <span style={{ fontSize: '10px', color: '#999', marginLeft: '4px' }}>(必填)</span>}
                       </label>
                       <div style={{ display: 'flex', gap: '20px' }}>
                         <label style={{
@@ -890,10 +1255,10 @@ export default function TeamRegistration() {
                         }}>
                           <input
                             type="radio"
-                            name={`gender-${index}`}
+                            name={`${field.fieldName}-${index}`}
                             value="男"
-                            checked={member['性别'] === '男'}
-                            onChange={(e) => handleMemberChange(index, '性别', e.target.value)}
+                            checked={member[field.fieldName] === '男'}
+                            onChange={(e) => handleMemberChange(index, field.fieldName, e.target.value)}
                             disabled={field.hintText === '女'}
                             style={{
                               marginRight: '6px',
@@ -914,10 +1279,10 @@ export default function TeamRegistration() {
                         }}>
                           <input
                             type="radio"
-                            name={`gender-${index}`}
+                            name={`${field.fieldName}-${index}`}
                             value="女"
-                            checked={member['性别'] === '女'}
-                            onChange={(e) => handleMemberChange(index, '性别', e.target.value)}
+                            checked={member[field.fieldName] === '女'}
+                            onChange={(e) => handleMemberChange(index, field.fieldName, e.target.value)}
                             disabled={field.hintText === '男'}
                             style={{
                               marginRight: '6px',
@@ -943,7 +1308,8 @@ export default function TeamRegistration() {
                         color: '#666',
                         fontWeight: '500'
                       }}>
-                        {field.fieldName} {field.required && <span style={{ color: 'red' }}>*</span>}
+                        {field.fieldName} {field.required && <span style={{ color: 'red', fontWeight: 'bold' }}>*</span>}
+                        {field.required && <span style={{ fontSize: '10px', color: '#999', marginLeft: '4px' }}>(必填)</span>}
                       </label>
                       <input
                         type={field.type}
@@ -987,33 +1353,35 @@ export default function TeamRegistration() {
       )}
 
       {/* 提交按钮 */}
-      {!fieldsLoading && (
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '20px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-        }}>
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '15px',
-              backgroundColor: loading ? '#ccc' : '#ff6b35',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'background-color 0.2s'
-            }}
-          >
-            {loading ? '提交中...' : `确认报名 (${formData.members.length}人)`}
-          </button>
-        </div>
-      )}
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        padding: '20px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+      }}>
+        <button
+          onClick={(e) => {
+            console.log('按钮被点击');
+            e.preventDefault();
+            handleSubmit();
+          }}
+          disabled={loading || fieldsLoading}
+          style={{
+            width: '100%',
+            padding: '15px',
+            backgroundColor: (loading || fieldsLoading) ? '#ccc' : '#ff6b35',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '16px',
+            fontWeight: '600',
+            cursor: (loading || fieldsLoading) ? 'not-allowed' : 'pointer',
+            transition: 'background-color 0.2s'
+          }}
+        >
+          {loading ? '提交中...' : fieldsLoading ? '加载中...' : `确认报名 (${formData.members.length}人)`}
+        </button>
+      </div>
     </div>
   );
 } 

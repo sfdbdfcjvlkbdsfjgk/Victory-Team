@@ -15,7 +15,10 @@ import FamilyRegistration from '../pages/FamilyRegistration';
 import PersonalRegistration from '../pages/PersonalRegistration';
 import RegistrationSelection from '../pages/RegistrationSelection';
 import TeamRegistration from '../pages/TeamRegistration';
-import Sp from '../pages/Sp'
+import Sp from '../pages/Sp';
+import Js from '../pages/Js';
+import Jsxq from '../pages/Jsxq';
+import VideoPlayer from '../pages/VideoPlayer';
 
 import React from 'react';
 
@@ -64,6 +67,14 @@ export const router = createBrowserRouter([
         element: React.createElement(Sou)
       },
       {
+        path: 'Js',
+        element: React.createElement(Js)
+      },
+      {
+        path: 'video/:videoId',
+        element: React.createElement(VideoPlayer)
+      },
+      {
         path: "/activity-detail/:activityId",
         element: React.createElement(Activitydetail)
       },
@@ -87,7 +98,6 @@ export const router = createBrowserRouter([
         path: 'sp',
         element: React.createElement(Sp)
       },
-     
       {
         path: 'profile',
         element: React.createElement(Profile),
