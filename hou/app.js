@@ -27,18 +27,21 @@ app.use(cookieParser());
 app.use(fileUpload({
   createParentPath: true,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 限制文件大小为10MB
+    fileSize: 500 * 1024 * 1024 // 修改为500MB，与视频上传限制一致
   }
 }));
 
 // 静态文件服务配置
 app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders: (res, path, stat) => {
-    if (path.endsWith('.mp4')) {
+    if (path.endsWith('.mp4') || path.endsWith('.avi') || path.endsWith('.mov') || path.endsWith('.wmv')) {
       res.set({
         'Content-Type': 'video/mp4',
         'Accept-Ranges': 'bytes',
-        'Cache-Control': 'public, max-age=3600'
+        'Cache-Control': 'public, max-age=3600',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+        'Access-Control-Allow-Headers': 'Range, Content-Range'
       });
     }
   }

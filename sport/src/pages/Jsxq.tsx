@@ -200,15 +200,31 @@ export default function VideoPlayer() {
             ) : (
               <video
                 controls
+                preload="metadata"
+                crossOrigin="anonymous"
                 style={{
                   width: '100%',
                   maxHeight: '500px',
                   display: 'block'
                 }}
                 poster={`http://localhost:3000${video.thumbnail}`}
-                onError={handleVideoError}
+                onError={(e) => {
+                  console.error('视频播放错误:', e);
+                  const target = e.target as HTMLVideoElement;
+                  console.error('视频错误详情:', {
+                    error: target.error,
+                    networkState: target.networkState,
+                    readyState: target.readyState,
+                    src: target.src
+                  });
+                  handleVideoError();
+                }}
+                onLoadStart={() => console.log('开始加载视频')}
+                onCanPlay={() => console.log('视频可以播放')}
+                onLoadedMetadata={() => console.log('视频元数据加载完成')}
               >
                 <source src={`http://localhost:3000${video.videoUrl}`} type="video/mp4" />
+                <source src={`http://localhost:3000/api/videos/play/${video.videoUrl.split('/').pop()}`} type="video/mp4" />
                 您的浏览器不支持视频播放
               </video>
             )}
