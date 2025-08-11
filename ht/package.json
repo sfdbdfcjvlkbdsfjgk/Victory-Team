@@ -9,12 +9,20 @@
     "preview": "vite preview"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@element-plus/icons-vue": "^2.3.1",
     "@vueup/vue-quill": "^1.2.0",
     "axios": "^1.11.0",
     "dayjs": "^1.11.13",
     "element-plus": "^2.10.4",
     "quill": "^2.0.3",
+=======
+    "@types/sortablejs": "^1.15.8",
+    "axios": "^1.11.0",
+    "element-plus": "^2.10.4",
+    "sortablejs": "^1.15.6",
+    "spark-md5": "^3.0.2",
+>>>>>>> origin/fjl
     "vue": "^3.5.17",
     "vue-router": "^4.5.1"
   },

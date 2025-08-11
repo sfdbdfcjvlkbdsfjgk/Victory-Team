@@ -340,10 +340,18 @@ watch(() => route.path, (newPath) => {
 
 /* 主内容区 */
 .el-main {
+<<<<<<< HEAD
   padding: 20px;
   background-color: #f2f3f5;
   overflow-y: auto;
   height: calc(100vh - 72px) !important;
+=======
+  background-color: #e9eef3;
+  color: #333;
+  text-align: center;
+  /* line-height: calc(100vh - 60px); */
+  padding: 0;
+>>>>>>> origin/fjl
 }
 
 /* 顶部导航细节 */

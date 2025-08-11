@@ -1,8 +1,19 @@
+<<<<<<< HEAD
 /* #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+=======
+#root {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.app {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+>>>>>>> origin/fjl
 }
 
 .logo {
@@ -39,4 +50,8 @@
 
 .read-the-docs {
   color: #888;
+<<<<<<< HEAD
 } */
+=======
+}
+>>>>>>> origin/fjl

@@ -9,6 +9,7 @@ export const ROUTES = {
   COMMUNITY: '/community',
   SPORTS: '/sports',
   BOOKING: '/booking',
+  SPORTS_EVENTS: '/sports-events',
   PROFILE: '/profile',
   PROFILE_SETTINGS: '/profile/settings'
 } as const;
@@ -57,6 +58,10 @@ export const ROUTE_METADATA: Record<string, RouteMetadata> = {
   },
   [ROUTES.PREFERENCES]: {
     title: '喜好选择'
-  }
+
+  },
+  [ROUTES.SPORTS_EVENTS]: {
+    title: '体育赛事'
+  },
 };
 

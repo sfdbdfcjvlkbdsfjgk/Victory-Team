@@ -1,0 +1,257 @@
+/* 体育赛事页面样式 */
+
+/* 问卷相关样式 */
+.selected-option {
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3) !important;
+  transform: translateY(-2px);
+}
+
+.questionnaire-progress {
+  animation: progressGrow 0.5s ease-out;
+}
+
+@keyframes progressGrow {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--progress-width);
+  }
+}
+
+/* 问卷选项悬停效果 */
+.ant-btn:not(.ant-btn-primary):hover {
+  border-color: #4A90E2;
+  color: #4A90E2;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
+}
+
+/* 问卷完成页面动画 */
+.questionnaire-complete {
+  animation: bounceIn 0.8s ease-out;
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.exam-item-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 1px solid #f0f0f0;
+}
+
+.exam-item-card:hover {
+  border-color: #4A90E2;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(74, 144, 226, 0.15);
+}
+
+.training-course-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 1px solid #f0f0f0;
+}
+
+.training-course-card:hover {
+  border-color: #4A90E2;
+  transform: translateX(4px);
+  box-shadow: 0 8px 24px rgba(74, 144, 226, 0.15);
+}
+
+/* 倒计时卡片渐变动画 */
+.countdown-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.countdown-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* 性别选择按钮样式 */
+.gender-button {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.gender-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.4s ease;
+}
+
+.gender-button:hover::before {
+  width: 300%;
+  height: 300%;
+}
+
+/* 考试项目卡片动画 */
+.exam-item-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.exam-item-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent, rgba(74, 144, 226, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.exam-item-card:hover::after {
+  opacity: 1;
+}
+
+/* 培训课程卡片图片悬停效果 */
+.training-course-card .lazy-image-container img {
+  transition: transform 0.3s ease;
+}
+
+.training-course-card:hover .lazy-image-container img {
+  transform: scale(1.05);
+}
+
+/* 标签动画 */
+.ant-tag {
+  transition: all 0.3s ease;
+}
+
+.ant-tag:hover {
+  transform: scale(1.05);
+}
+
+/* 按钮点击效果 */
+.ant-btn {
+  transition: all 0.3s ease;
+}
+
+.ant-btn:active {
+  transform: scale(0.95);
+}
+
+/* 卡片标题样式 */
+.ant-card-head-title {
+  font-weight: 600;
+  color: #333;
+}
+
+/* 价格显示样式 */
+.price-text {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 700;
+}
+
+/* 倒计时数字样式 */
+.ant-statistic-content-value {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 800;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .exam-item-card {
+    margin-bottom: 12px;
+  }
+  
+  .training-course-card {
+    margin-bottom: 12px;
+  }
+  
+  .countdown-card {
+    padding: 16px;
+  }
+  
+  .ant-statistic-content-value {
+    font-size: 28px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .exam-item-card .ant-card-body {
+    padding: 12px;
+  }
+  
+  .training-course-card .ant-card-body {
+    padding: 8px;
+  }
+  
+  .countdown-card {
+    padding: 12px;
+  }
+  
+  .ant-statistic-content-value {
+    font-size: 24px !important;
+  }
+}
+
+/* 加载动画优化 */
+.animate__animated {
+  animation-duration: 0.8s;
+  animation-fill-mode: both;
+}
+
+.animate__bounceIn {
+  animation-duration: 0.6s;
+}
+
+.animate__fadeInRight {
+  animation-duration: 0.7s;
+}
+
+/* 性能优化 */
+.exam-item-card,
+.training-course-card {
+  will-change: transform;
+}
+
+.exam-item-card:hover,
+.training-course-card:hover {
+  will-change: auto;
+} 

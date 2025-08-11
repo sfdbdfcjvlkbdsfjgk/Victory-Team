@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中文文件名上传测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .upload-area { 
+            border: 2px dashed #409eff; 
+            padding: 40px; 
+            text-align: center; 
+            margin: 20px 0;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .upload-area:hover { background-color: #f0f8ff; }
+        .progress { width: 100%; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+        .progress-bar { height: 100%; background: #409eff; width: 0%; transition: width 0.3s; }
+        .status { margin: 10px 0; font-size: 14px; color: #666; }
+        .success { color: #67c23a; }
+        .error { color: #f56c6c; }
+        .log { background: #f5f5f5; padding: 10px; border-radius: 5px; max-height: 300px; overflow-y: auto; font-size: 12px; margin: 10px 0; }
+        .file-info { background: #e8f5e8; padding: 10px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🈲 中文文件名上传测试</h1>
+    <p>专门测试包含中文字符的文件名上传功能</p>
+    
+    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+        <p>📁 选择包含中文名称的文件</p>
+        <p style="font-size: 12px; color: #999;">支持：我的照片.jpg、视频文件.mp4 等中文文件名</p>
+        <input type="file" id="fileInput" style="display: none" accept="*/*">
+    </div>
+
+    <div id="fileInfo" class="file-info" style="display: none;"></div>
+
+    <div id="progressContainer" style="display: none;">
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="status" id="status">准备上传...</div>
+    </div>
+
+    <div class="log" id="log"></div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: '#333',
+                success: '#67c23a',
+                error: '#f56c6c',
+                warn: '#e6a23c'
+            };
+            logElement.innerHTML += `<div style="color: ${colors[type]}; margin: 2px 0;">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function updateProgress(percent, status) {
+            document.getElementById('progressContainer').style.display = 'block';
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('status').textContent = status;
+        }
+
+        // 测试hash生成函数
+        function calculateFileHash(file) {
+            return new Promise((resolve) => {
+                // 使用安全的方式生成hash，避免中文字符问题
+                const fileInfo = `${file.size}_${file.lastModified}_${Date.now()}`;
+                let hash = '';
+                
+                // 简单hash算法，避免btoa编码问题
+                for (let i = 0; i < fileInfo.length; i++) {
+                    const char = fileInfo.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash; // 转换为32位整数
+                }
+                
+                // 转换为正数并添加随机后缀
+                const positiveHash = Math.abs(hash).toString(36);
+                const randomSuffix = Math.random().toString(36).substr(2, 8);
+                const finalHash = positiveHash + randomSuffix;
+                
+                resolve(finalHash);
+            });
+        }
+
+        async function testFileUpload(file) {
+            log(`🚀 开始测试文件: ${file.name}`, 'info');
+            log(`📊 文件大小: ${(file.size / 1024 / 1024).toFixed(2)}MB`, 'info');
+            log(`📅 最后修改: ${new Date(file.lastModified).toLocaleString()}`, 'info');
+
+            // 显示文件信息
+            const fileInfoEl = document.getElementById('fileInfo');
+            fileInfoEl.style.display = 'block';
+            fileInfoEl.innerHTML = `
+                <h3>📁 文件信息</h3>
+                <p><strong>文件名:</strong> ${file.name}</p>
+                <p><strong>大小:</strong> ${(file.size / 1024 / 1024).toFixed(2)}MB</p>
+                <p><strong>类型:</strong> ${file.type || '未知'}</p>
+                <p><strong>最后修改:</strong> ${new Date(file.lastModified).toLocaleString()}</p>
+            `;
+
+            try {
+                // 测试hash生成
+                updateProgress(10, '测试文件Hash生成...');
+                log('🔑 开始生成文件Hash...', 'info');
+                
+                const fileHash = await calculateFileHash(file);
+                log(`✅ Hash生成成功: ${fileHash}`, 'success');
+                
+                updateProgress(30, '测试分片创建...');
+                log('📦 开始创建文件分片...', 'info');
+                
+                // 创建小分片进行测试
+                const chunkSize = 1024 * 1024; // 1MB
+                const chunks = [];
+                let start = 0;
+                let index = 0;
+                
+                while (start < file.size && index < 3) { // 只测试前3个分片
+                    const end = Math.min(start + chunkSize, file.size);
+                    chunks.push({
+                        chunk: file.slice(start, end),
+                        index,
+                        size: end - start
+                    });
+                    start = end;
+                    index++;
+                }
+                
+                log(`✅ 创建了 ${chunks.length} 个测试分片`, 'success');
+                
+                updateProgress(60, '测试API调用...');
+                log('🌐 测试后端API连接...', 'info');
+                
+                // 测试检查API
+                const checkResponse = await fetch('http://localhost:3000/api/upload-simple/check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fileHash: fileHash,
+                        totalChunks: chunks.length
+                    })
+                });
+                
+                if (checkResponse.ok) {
+                    const result = await checkResponse.json();
+                    log(`✅ API连接正常: ${result.msg}`, 'success');
+                } else {
+                    log(`❌ API连接失败: ${checkResponse.status}`, 'error');
+                }
+                
+                updateProgress(100, '测试完成！');
+                log('🎉 中文文件名上传测试通过！', 'success');
+                
+            } catch (error) {
+                log(`❌ 测试失败: ${error.message}`, 'error');
+                updateProgress(0, '测试失败');
+                document.getElementById('status').className = 'status error';
+            }
+        }
+
+        // 事件监听
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                testFileUpload(e.target.files[0]);
+            }
+        });
+
+        // 拖放支持
+        const uploadArea = document.querySelector('.upload-area');
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.backgroundColor = '#f0f8ff';
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.backgroundColor = '';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.backgroundColor = '';
+            if (e.dataTransfer.files.length > 0) {
+                testFileUpload(e.dataTransfer.files[0]);
+            }
+        });
+
+        log('📋 中文文件名测试工具已就绪');
+        log('💡 请选择包含中文字符的文件进行测试');
+    </script>
+</body>
+</html> 

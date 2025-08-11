@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+<<<<<<< HEAD
 
 // Node.js 环境变量类型定义
 declare global {
@@ -67,3 +68,5 @@ declare global {
     facingMode?: string | { ideal?: string };
   }
 }
+=======
+>>>>>>> origin/fjl

@@ -1,7 +1,8 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import React from 'react';
 import Layout from '../components/Layout';
-import HomePage from '../pages/Home';
+// import HomePage from '../pages/Home';
+import HomePage from '../pages/fjl/Home';
 import Auth from '../pages/Auth';
 import Guide from '../pages/Guide';
 import Preferences from '../pages/Preferences';
@@ -9,7 +10,6 @@ import Community from '../pages/Community';
 import Sports from '../pages/Sports';
 import Booking from '../pages/Booking';
 import Profile from '../pages/Profile';
-
 import Sou from '../pages/Sou';
 import Activitydetail from '../pages/ActivityDetail';
 import FamilyRegistration from '../pages/FamilyRegistration';
@@ -18,6 +18,10 @@ import RegistrationSelection from '../pages/RegistrationSelection';
 import TeamRegistration from '../pages/TeamRegistration';
 import Sp from '../pages/Sp';
 import AssociationDetail from '../pages/AssociationDetail';
+import SportsEvents from '../pages/fjl/SportsEvents';
+import { ROUTES } from './types';
+
+
 
 // 错误页面组件
 const ErrorPage = () => (
@@ -30,7 +34,9 @@ const ErrorPage = () => (
 
 export const router = createBrowserRouter([
   {
+
     // 主布局路由 - 包含底部导航栏的页面
+
     path: '/',
     element: React.createElement(Layout),
     errorElement: React.createElement(ErrorPage),
@@ -65,7 +71,6 @@ export const router = createBrowserRouter([
         path: 'booking',
         element: React.createElement(Booking)
       },
-
       {
         // 搜索页面
         path: 'sou',
@@ -108,6 +113,14 @@ export const router = createBrowserRouter([
       },
       {
         // 个人中心页面 - 底部导航栏项目，包含子路由
+        path: 'booking',
+        element: React.createElement(Booking)
+      },
+      {
+        path: 'sports-events',
+        element: React.createElement(SportsEvents)
+      },
+      {
         path: 'profile',
         element: React.createElement(Profile),
         children: [
@@ -131,6 +144,7 @@ export const router = createBrowserRouter([
     element: React.createElement(Navigate, { to: '/auth', replace: true })
   },
   {
+
     // 注册路由重定向 - 重定向到统一的认证页面
     path: '/register',
     element: React.createElement(Navigate, { to: '/auth', replace: true })
@@ -141,5 +155,14 @@ export const router = createBrowserRouter([
     element: React.createElement(ErrorPage)
   }
 ]);
+    // path: '*',
+    // element: React.createElement(ErrorPage)
+//   }
+// ], {
+//   future: {
+//     v7_startTransition: true,
+//   }
+// });
+
 
 export default router;

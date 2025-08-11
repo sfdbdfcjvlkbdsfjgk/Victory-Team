@@ -1,0 +1,256 @@
+/* 无限滚动容器 */
+.infinite-scroll {
+  width: 100%;
+  position: relative;
+}
+
+/* 虚拟列表容器 */
+.virtual-list-container {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.virtual-list-content {
+  position: relative;
+}
+
+.virtual-list-items {
+  will-change: transform;
+}
+
+.virtual-list-item {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 普通列表 */
+.normal-list {
+  width: 100%;
+}
+
+.list-item {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 加载更多触发器 */
+.load-more-trigger {
+  height: 1px;
+  position: relative;
+}
+
+/* 加载中状态 */
+.loading-more {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* 小型加载动画 */
+.loading-spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #4A90E2;
+  border-radius: 50%;
+  animation: spin-small 1s linear infinite;
+}
+
+@keyframes spin-small {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 错误状态 */
+.load-error {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.error-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.error-text {
+  color: #f56c6c;
+  font-size: 14px;
+  text-align: center;
+}
+
+.retry-button {
+  padding: 8px 16px;
+  background-color: #4A90E2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.retry-button:hover {
+  background-color: #357ABD;
+}
+
+/* 加载结束状态 */
+.load-end {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.end-line {
+  flex: 1;
+  height: 1px;
+  background-color: #e0e0e0;
+}
+
+.end-text {
+  color: #999;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* 空状态 */
+.infinite-scroll-empty {
+  padding: 60px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: #999;
+}
+
+.empty-icon {
+  font-size: 48px;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 16px;
+  text-align: center;
+}
+
+/* 滚动条样式 */
+.virtual-list-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.virtual-list-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+
+.virtual-list-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 2px;
+}
+
+.virtual-list-container::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .loading-content {
+    font-size: 13px;
+  }
+  
+  .error-text {
+    font-size: 13px;
+  }
+  
+  .retry-button {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .end-text {
+    font-size: 11px;
+  }
+  
+  .empty-icon {
+    font-size: 36px;
+  }
+  
+  .empty-text {
+    font-size: 14px;
+  }
+}
+
+/* 性能优化 */
+.virtual-list-items {
+  contain: layout style paint;
+}
+
+.virtual-list-item {
+  contain: layout style paint;
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .loading-content {
+    color: #ccc;
+  }
+  
+  .error-text {
+    color: #ff7b7b;
+  }
+  
+  .end-line {
+    background-color: #444;
+  }
+  
+  .end-text {
+    color: #666;
+  }
+  
+  .empty-state {
+    color: #666;
+  }
+  
+  .virtual-list-container::-webkit-scrollbar-track {
+    background: #333;
+  }
+  
+  .virtual-list-container::-webkit-scrollbar-thumb {
+    background: #666;
+  }
+  
+  .virtual-list-container::-webkit-scrollbar-thumb:hover {
+    background: #777;
+  }
+}
+
+/* 动画优化 */
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner-small {
+    animation: none;
+  }
+  
+  .virtual-list-items {
+    transition: none;
+  }
+} 
