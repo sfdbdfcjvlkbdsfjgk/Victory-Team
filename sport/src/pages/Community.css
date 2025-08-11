@@ -1,0 +1,527 @@
+.community-container {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding-bottom: 80px;
+}
+
+/* 顶部导航 */
+.community-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.back-icon {
+  color: #666;
+  margin-right: 12px;
+  cursor: pointer;
+}
+
+.page-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  margin-right: 32px;
+}
+
+/* 标签页 */
+.tabs-container {
+  background-color: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  position: relative;
+}
+
+.tabs {
+  display: flex;
+  padding: 0 16px;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 16px 0;
+  font-size: 16px;
+  color: #666;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.tab.active {
+  color: #ff6b35;
+  font-weight: 600;
+}
+
+.tab-badge {
+  font-size: 14px;
+}
+
+.tab-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 16px;
+  width: calc(50% - 16px);
+  height: 3px;
+  background: linear-gradient(90deg, #ff6b35 0%, #ffa726 100%);
+  border-radius: 2px;
+  transition: transform 0.3s ease;
+}
+
+/* 帖子列表 */
+.posts-list {
+  padding: 0;
+}
+
+.post-item {
+  background-color: #fff;
+  margin-bottom: 8px;
+  padding: 16px;
+  position: relative;
+}
+
+/* 用户信息 */
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.user-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.username-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.username {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.hot-badge {
+  background: linear-gradient(90deg, #ff6b35 0%, #ffa726 100%);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.post-time {
+  font-size: 14px;
+  color: #999;
+}
+
+.follow-btn {
+  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* 帖子内容 */
+.post-content {
+  margin-bottom: 16px;
+}
+
+.content-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #333;
+  margin: 0 0 12px 0;
+}
+
+/* 图片网格 */
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.post-image {
+  width: 100%;
+  height: 100px;
+  border-radius: 4px;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+/* 互动按钮 */
+.post-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #f5f5f5;
+}
+
+.action-group {
+  display: flex;
+  gap: 24px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.action-btn:hover {
+  color: #ff6b35;
+}
+
+.report-btn {
+  background: linear-gradient(90deg, #ff6b35 0%, #ffa726 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.report-btn:hover {
+  opacity: 0.9;
+}
+
+/* 分割线 */
+.post-divider {
+  position: absolute;
+  left: 68px;
+  right: 16px;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, #ff6b35 0%, transparent 100%);
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+  .images-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .post-image {
+    height: 80px;
+  }
+  
+  .action-group {
+    gap: 16px;
+  }
+}
+
+/* 新增样式 */
+.activity-tag {
+  display: inline-block;
+  background: linear-gradient(90deg, #ff6b35 0%, #ffa726 100%);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.content-text.collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 8;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.content-text.expanded {
+  display: block;
+}
+
+.expand-btn {
+  background: none;
+  border: none;
+  color: #ff6b35;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.association-name {
+  font-size: 12px;
+  color: #ff6b35;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.association-name:hover {
+  text-decoration: underline;
+}
+
+.tab-indicator.right {
+  transform: translateX(100%);
+}
+
+.action-btn.liked {
+  color: #ff6b35;
+}
+
+.action-btn.liked .heart-icon {
+  color: #ff6b35;
+}
+
+/* 实心爱心样式 */
+.action-btn.liked .heart-icon::before {
+  content: "❤️";
+  font-size: 16px;
+}
+
+/* 空心爱心样式 */
+.action-btn:not(.liked) .heart-icon::before {
+  content: "🤍";
+  font-size: 16px;
+}
+
+/* 隐藏原来的图标，使用伪元素显示爱心 */
+.action-btn .heart-icon svg {
+  display: none;
+}
+
+.action-btn .heart-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+/* 点赞动画效果 */
+.action-btn.liked {
+  animation: likeAnimation 0.3s ease-in-out;
+}
+
+@keyframes likeAnimation {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* 悬停效果 */
+.action-btn:hover:not(.liked) .heart-icon::before {
+  content: "💗";
+}
+
+.report-btn.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.report-btn.disabled:hover {
+  opacity: 1;
+}
+
+/* 协会页面样式 */
+.association-content {
+  padding: 16px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.create-btn {
+  background: linear-gradient(90deg, #4A90E2 0%, #357ABD 100%);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.my-associations {
+  margin-bottom: 24px;
+}
+
+.associations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.association-card {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  gap: 12px;
+}
+
+.my-card {
+  background: linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%);
+}
+
+.discover-card {
+  background: white;
+}
+
+.association-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.association-info {
+  flex: 1;
+}
+
+.association-info h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.latest-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.content-tag {
+  background: #FF6B35;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.content-title {
+  font-size: 12px;
+  color: #666;
+  flex: 1;
+}
+
+.content-date {
+  font-size: 10px;
+  color: #999;
+}
+
+.new-badge {
+  background: #FF4444;
+  color: white;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 8px;
+  font-weight: bold;
+}
+
+.description {
+  font-size: 12px;
+  color: #666;
+  margin: 4px 0;
+}
+
+.meta-info {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  color: #999;
+}
+
+.sport-type {
+  color: #4A90E2;
+}
+
+.member-count {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #666;
+}
+
+.join-btn {
+  background: linear-gradient(90deg, #4A90E2 0%, #357ABD 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  font-size: 14px;
+  background: #F5F5F5;
+  border-radius: 12px;
+}
+
+.create-association {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.create-btn-bottom {
+  background: linear-gradient(90deg, #4A90E2 0%, #357ABD 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+

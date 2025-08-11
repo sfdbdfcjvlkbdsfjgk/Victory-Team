@@ -28,8 +28,143 @@ mongoose
     console.log("数据库连接失败:", err);
   });
 
+// 活动帖子
+const activityPostSchema = new mongoose.Schema({
+  // 基础信息
+  id: String,
+  title: String,
+  
+  // 发布者信息
+  user: {
+    id: String,
+    name: String,
+    avatar: String,
+    isPresident: { type: Boolean, default: false }
+  },
+  
+  // 发布时间
+  publishTime: { type: Date, default: Date.now },
+  
+  // 所属协会
+  association: {
+    id: String,
+    name: String
+  },
+  
+  // 活动内容
+  content: {
+    title: String,
+    description: String,
+    registrationDeadline: String,
+    activityTime: String,
+    location: String,
+    maxParticipants: Number
+  },
+  
+  // 媒体内容
+  images: [String],
+  
+  // 互动数据
+  likes: { type: Number, default: 0 },
+  comments: { type: Number, default: 0 },
+  shares: { type: Number, default: 0 },
+  
+  // 报名相关
+  registeredCount: { type: Number, default: 0 },
+  registrationStatus: {
+    type: String,
+    enum: ['not_registered', 'registered', 'in_progress', 'ended'],
+    default: 'not_registered'
+  },
+  
+  // 时间控制
+  registrationStartTime: Date,
+  registrationEndTime: Date,
+  activityStartTime: Date,
+  activityEndTime: Date,
+  
+  // 用户状态
+  isLiked: { type: Boolean, default: false },
+  isUserMember: { type: Boolean, default: false },
+  
+  // 活动状态
+  state: { type: Number, default: 1 }, // 0-不显示，1-显示
+  activityprogress: String, // 活动进度
+  sportstype: String, // 运动类型
+  topstate: { type: Number, default: 0 }, // 置顶状态
+  type: String, // 活动类型
+  enrollment: Number, // 报名人数
+  readnumber: Number, // 阅读数量
+  
+  // 创建时间
+  createtime: { type: Date, default: Date.now }
+});
+const ActivityPost = mongoose.model('activitypost', activityPostSchema, 'activitypost');
 
+// 协会信息
+const associationSchema = new mongoose.Schema({
+  // 基础信息
+  id: String,
+  name: String,
+  description: String,
+  avatar: String,
+  coverImage: String,
+  
+  // 协会状态
+  state: { type: Number, default: 1 }, // 0-不显示，1-显示
+  
+  // 成员信息
+  memberCount: { type: Number, default: 0 },
+  maxMembers: Number,
+  
+  // 会长信息
+  president: {
+    id: String,
+    name: String,
+    avatar: String
+  },
+  
+  // 协会设置
+  needApproval: { type: Boolean, default: true }, // 是否需要审核入会
+  
+  // 统计数据
+  activityCount: { type: Number, default: 0 }, // 活动数量
+  
+  // 创建时间
+  createtime: { type: Date, default: Date.now }
+});
+const Association = mongoose.model('association', associationSchema, 'association');
 
+// 用户协会关联
+const userAssociationSchema = new mongoose.Schema({
+  // 用户ID
+  userId: String,
+  
+  // 协会ID
+  associationId: String,
+  
+  // 成员状态
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  },
+  
+  // 角色
+  role: {
+    type: String,
+    enum: ['member', 'admin', 'president'],
+    default: 'member'
+  },
+  
+  // 加入时间
+  joinTime: Date,
+  
+  // 申请时间
+  applyTime: { type: Date, default: Date.now }
+});
+
+const UserAssociation = mongoose.model('userassociation', userAssociationSchema, 'userassociation');
 const activitymanageSchema = new mongoose.Schema({
     id: String,
     title: String,
@@ -308,7 +443,8 @@ module.exports = {
   RolePermissionModel,      // 角色权限关联表
   UserRoleModel,            // 用户角色关联表
   YonghuUserModel,           // 用户表
-
+  ActivityPost,             // 活动赛事表
   UserModel,                  // 登录注册专用表
-
+  Association,             // 社团表
+  UserAssociation,         // 用户社团关联表
 };

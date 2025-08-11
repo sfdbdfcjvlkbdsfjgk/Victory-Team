@@ -11,10 +11,12 @@
   },
   "dependencies": {
     "@vant/area-data": "^2.0.0",
+    "antd-mobile": "^5.39.0",
+    "antd-mobile-icons": "^0.3.0",
     "axios": "^1.11.0",
     "emoji-picker-react": "^4.13.2",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",
     "vant": "^4.9.21"
   },
