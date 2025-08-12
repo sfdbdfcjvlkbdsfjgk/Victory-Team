@@ -1,7 +1,5 @@
 <template>
   <div class="publish-event">
-
-
     <h2>发布活动（含赛事活动）</h2>
     <div class="publish-content">
       <el-form :model="eventForm" label-width="120px" :rules="rules" ref="formRef">
@@ -1488,7 +1486,7 @@ const submitForm = async () => {
     // 构建提交数据，设置状态为发布(1)
     const submitData = {
       ...eventForm,
-      state: 1, // 发布状态
+      state: "已发布", // 发布状态
       // 替换限制字段为具体值
       formFields: eventForm.formFields.map(field => {
         if (field.type === 'age-restriction') {
@@ -1552,7 +1550,7 @@ const saveDraft = async () => {
     // 构建提交数据，设置状态为草稿(0)
     const submitData = {
       ...eventForm,
-      state: 0, // 草稿状态
+      state: "待发布", // 草稿状态
       // 替换限制字段为具体值
       formFields: eventForm.formFields.map(field => {
         if (field.type === 'age-restriction') {
@@ -1766,10 +1764,12 @@ watch(() => eventForm.activityAddress.city, (newVal) => {
     eventForm.activityAddress.district = ''
   }
 })
-
 </script>
 
 <style scoped>
+.publish-event {
+  padding: 20px;
+}
 
 .publish-content {
   margin-top: 20px;
@@ -2035,26 +2035,6 @@ watch(() => eventForm.activityAddress.city, (newVal) => {
 
 :deep(.el-alert) {
   margin: 0;
-}
-
-/* 标签模态框样式优化 */
-.dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.el-tag.selected {
-  background-color: #409eff !important;
-  color: white !important;
-  border-color: #409eff !important;
-}
-
-.el-tag:hover {
-  transform: scale(1.05);
-}
-
-.loading-container {
-  padding: 20px;
 }
 
 /* 标签模态框样式优化 */

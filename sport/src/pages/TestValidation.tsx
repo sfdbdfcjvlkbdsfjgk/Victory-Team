@@ -1,141 +1,166 @@
-import React, { useState } from 'react';
-import { validatePhone, validateIdCard, validateName, validateEmail } from '../utils/validation';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+interface VideoTestData {
+  fileName: string;
+  exists: boolean;
+  fileSize?: number;
+  fileSizeMB?: string;
+  videoUrl?: string;
+  staticUrl?: string;
+  createTime?: string;
+}
 
 export default function TestValidation() {
-  const [phone, setPhone] = useState('');
-  const [idCard, setIdCard] = useState('');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [videos, setVideos] = useState<any[]>([]);
+  const [selectedVideo, setSelectedVideo] = useState<string>('');
+  const [testResults, setTestResults] = useState<VideoTestData | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const [phoneError, setPhoneError] = useState('');
-  const [idCardError, setIdCardError] = useState('');
-  const [nameError, setNameError] = useState('');
-  const [emailError, setEmailError] = useState('');
-
-  const handlePhoneChange = (value: string) => {
-    setPhone(value);
-    const validation = validatePhone(value);
-    setPhoneError(validation.isValid ? '' : validation.message);
+  // 获取视频列表
+  const fetchVideos = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/videos/list');
+      if (response.data.code === 200) {
+        setVideos(response.data.data);
+      }
+    } catch (error) {
+      console.error('获取视频列表失败:', error);
+    }
   };
 
-  const handleIdCardChange = (value: string) => {
-    setIdCard(value);
-    const validation = validateIdCard(value);
-    setIdCardError(validation.isValid ? '' : validation.message);
+  // 测试视频文件
+  const testVideoFile = async (fileName: string) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`http://localhost:3000/api/videos/check/${fileName}`);
+      setTestResults(response.data.data);
+    } catch (error) {
+      console.error('测试视频文件失败:', error);
+      setTestResults(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleNameChange = (value: string) => {
-    setName(value);
-    const validation = validateName(value);
-    setNameError(validation.isValid ? '' : validation.message);
-  };
-
-  const handleEmailChange = (value: string) => {
-    setEmail(value);
-    const validation = validateEmail(value);
-    setEmailError(validation.isValid ? '' : validation.message);
-  };
+  useEffect(() => {
+    fetchVideos();
+  }, []);
 
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-      <h2>表单校验测试</h2>
+    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
+      <h1>视频播放测试</h1>
       
+      {/* 视频选择 */}
       <div style={{ marginBottom: '20px' }}>
-        <label>手机号:</label>
-        <input
-          type="text"
-          value={phone}
-          onChange={(e) => handlePhoneChange(e.target.value)}
-          placeholder="请输入手机号"
+        <h3>选择要测试的视频：</h3>
+        <select 
+          value={selectedVideo} 
+          onChange={(e) => setSelectedVideo(e.target.value)}
+          style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
+        >
+          <option value="">请选择视频</option>
+          {videos.map((video) => (
+            <option key={video._id} value={video.videoUrl?.split('/').pop() || ''}>
+              {video.title} ({video.videoUrl?.split('/').pop()})
+            </option>
+          ))}
+        </select>
+        
+        <button 
+          onClick={() => selectedVideo && testVideoFile(selectedVideo)}
+          disabled={!selectedVideo || loading}
           style={{
-            width: '100%',
-            padding: '10px',
-            border: phoneError ? '1px solid #f56c6c' : '1px solid #ddd',
+            padding: '10px 20px',
+            backgroundColor: '#409eff',
+            color: 'white',
+            border: 'none',
             borderRadius: '4px',
-            marginTop: '5px'
+            cursor: selectedVideo ? 'pointer' : 'not-allowed'
           }}
-        />
-        {phoneError && (
-          <div style={{ color: '#f56c6c', fontSize: '12px', marginTop: '5px' }}>
-            {phoneError}
-          </div>
-        )}
+        >
+          {loading ? '测试中...' : '测试视频文件'}
+        </button>
       </div>
 
-      <div style={{ marginBottom: '20px' }}>
-        <label>身份证号:</label>
-        <input
-          type="text"
-          value={idCard}
-          onChange={(e) => handleIdCardChange(e.target.value)}
-          placeholder="请输入身份证号"
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: idCardError ? '1px solid #f56c6c' : '1px solid #ddd',
-            borderRadius: '4px',
-            marginTop: '5px'
-          }}
-        />
-        {idCardError && (
-          <div style={{ color: '#f56c6c', fontSize: '12px', marginTop: '5px' }}>
-            {idCardError}
-          </div>
-        )}
-      </div>
+      {/* 测试结果 */}
+      {testResults && (
+        <div style={{ 
+          backgroundColor: '#f5f5f5', 
+          padding: '15px', 
+          borderRadius: '8px',
+          marginBottom: '20px'
+        }}>
+          <h3>测试结果：</h3>
+          <pre style={{ whiteSpace: 'pre-wrap', fontSize: '14px' }}>
+            {JSON.stringify(testResults, null, 2)}
+          </pre>
+        </div>
+      )}
 
-      <div style={{ marginBottom: '20px' }}>
-        <label>姓名:</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => handleNameChange(e.target.value)}
-          placeholder="请输入姓名"
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: nameError ? '1px solid #f56c6c' : '1px solid #ddd',
-            borderRadius: '4px',
-            marginTop: '5px'
-          }}
-        />
-        {nameError && (
-          <div style={{ color: '#f56c6c', fontSize: '12px', marginTop: '5px' }}>
-            {nameError}
+      {/* 视频播放测试 */}
+      {selectedVideo && testResults?.exists && (
+        <div style={{ marginBottom: '20px' }}>
+          <h3>视频播放测试：</h3>
+          
+          {/* 直接静态访问 */}
+          <div style={{ marginBottom: '15px' }}>
+            <h4>方式1: 直接静态文件访问</h4>
+            <video
+              controls
+              preload="metadata"
+              style={{ width: '100%', maxHeight: '300px', backgroundColor: '#000' }}
+              onError={(e) => console.error('静态文件播放错误:', e)}
+              onLoadStart={() => console.log('静态文件开始加载')}
+              onCanPlay={() => console.log('静态文件可以播放')}
+            >
+              <source src={testResults.staticUrl} type="video/mp4" />
+              静态文件播放失败
+            </video>
           </div>
-        )}
-      </div>
 
-      <div style={{ marginBottom: '20px' }}>
-        <label>邮箱:</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => handleEmailChange(e.target.value)}
-          placeholder="请输入邮箱"
-          style={{
-            width: '100%',
-            padding: '10px',
-            border: emailError ? '1px solid #f56c6c' : '1px solid #ddd',
-            borderRadius: '4px',
-            marginTop: '5px'
-          }}
-        />
-        {emailError && (
-          <div style={{ color: '#f56c6c', fontSize: '12px', marginTop: '5px' }}>
-            {emailError}
+          {/* API播放 */}
+          <div style={{ marginBottom: '15px' }}>
+            <h4>方式2: API流式播放</h4>
+            <video
+              controls
+              preload="metadata"
+              style={{ width: '100%', maxHeight: '300px', backgroundColor: '#000' }}
+              onError={(e) => console.error('API播放错误:', e)}
+              onLoadStart={() => console.log('API开始加载')}
+              onCanPlay={() => console.log('API可以播放')}
+            >
+              <source src={testResults.videoUrl} type="video/mp4" />
+              API播放失败
+            </video>
           </div>
-        )}
-      </div>
 
-      <div style={{ marginTop: '30px', padding: '15px', backgroundColor: '#f0f9ff', borderRadius: '8px' }}>
-        <h3>校验说明:</h3>
-        <ul style={{ fontSize: '14px', lineHeight: '1.6' }}>
-          <li><strong>手机号:</strong> 必须是11位数字，以1开头，第二位是3-9</li>
-          <li><strong>身份证号:</strong> 支持15位和18位格式，18位会校验最后一位校验码</li>
-          <li><strong>姓名:</strong> 2-20个字符，只能包含中文、英文和空格</li>
-          <li><strong>邮箱:</strong> 标准邮箱格式，包含@和域名</li>
-        </ul>
+          {/* 调试信息 */}
+          <div style={{ fontSize: '12px', color: '#666' }}>
+            <p><strong>静态URL:</strong> {testResults.staticUrl}</p>
+            <p><strong>API URL:</strong> {testResults.videoUrl}</p>
+            <p><strong>文件大小:</strong> {testResults.fileSizeMB} MB</p>
+          </div>
+        </div>
+      )}
+
+      {/* 视频列表 */}
+      <div>
+        <h3>所有视频列表：</h3>
+        <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+          {videos.map((video) => (
+            <div key={video._id} style={{ 
+              padding: '10px', 
+              border: '1px solid #ddd', 
+              margin: '5px 0',
+              borderRadius: '4px'
+            }}>
+              <strong>{video.title}</strong><br/>
+              <small>URL: {video.videoUrl}</small><br/>
+              <small>创建时间: {new Date(video.createTime).toLocaleString()}</small>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

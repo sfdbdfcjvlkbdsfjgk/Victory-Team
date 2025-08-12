@@ -21,6 +21,9 @@ import AssociationDetail from '../pages/AssociationDetail';
 import SportsEvents from '../pages/fjl/SportsEvents';
 import { ROUTES } from './types';
 
+import Js from '../pages/Js';
+import Jsxq from '../pages/Jsxq';
+import VideoPlayer from '../pages/VideoPlayer';
 
 
 // 错误页面组件
@@ -78,6 +81,14 @@ export const router = createBrowserRouter([
       },
       {
         // 活动详情页面 - 动态路由参数 activityId
+        path: 'Js',
+        element: React.createElement(Js)
+      },
+      {
+        path: 'video/:videoId',
+        element: React.createElement(VideoPlayer)
+      },
+      {
         path: "/activity-detail/:activityId",
         element: React.createElement(Activitydetail)
       },

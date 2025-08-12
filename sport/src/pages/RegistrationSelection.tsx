@@ -29,6 +29,14 @@ export default function RegistrationSelection() {
   const [selectedItem, setSelectedItem] = useState<RegistrationItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | 'warning' } | null>(null);
+
+  const showMessage = (text: string, type: 'success' | 'error' | 'warning') => {
+    setMessage({ text, type });
+    setTimeout(() => {
+      setMessage(null);
+    }, 3000);
+  };
 
   useEffect(() => {
     if (activityId) {
@@ -66,7 +74,7 @@ export default function RegistrationSelection() {
 
   const handleContinue = () => {
     if (!selectedItem) {
-      alert('请选择一个报名项目');
+      showMessage('请选择一个报名项目', 'warning');
       return;
     }
 
@@ -235,6 +243,21 @@ export default function RegistrationSelection() {
           {getRegistrationTypeText()}
         </h2>
       </div>
+
+      {/* 消息提示 */}
+      {message && (
+        <div style={{
+          backgroundColor: message.type === 'success' ? '#f6ffed' : message.type === 'error' ? '#fff2f0' : '#fff7e6',
+          border: message.type === 'success' ? '1px solid #b7eb8f' : message.type === 'error' ? '1px solid #ffccc7' : '1px solid #ffd591',
+          borderRadius: '6px',
+          padding: '8px 12px',
+          marginBottom: '15px',
+          fontSize: '12px',
+          color: message.type === 'success' ? '#52c41a' : message.type === 'error' ? '#ff4d4f' : '#faad14'
+        }}>
+          {message.text}
+        </div>
+      )}
 
       {/* 选择提示 */}
       <div style={{

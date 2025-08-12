@@ -127,8 +127,8 @@ export const validateTeamDescription = (description: string): { isValid: boolean
     return { isValid: true, message: '' }; // 团队简介可选
   }
   
-  if (description.length > 500) {
-    return { isValid: false, message: '团队简介不能超过500个字符' };
+  if (description.length >= 200) {
+    return { isValid: false, message: '团队简介不能超过200个字符' };
   }
   
   return { isValid: true, message: '' };
@@ -177,6 +177,9 @@ export const validateField = (fieldName: string, value: string, fieldType?: stri
   }
   
   // 默认必填项校验
+  if (!value || value.trim() === '') {
+    return { isValid: false, message: `请填写${fieldName}` };
+  }
   return validateRequired(value, fieldName);
 };
 
@@ -210,10 +213,15 @@ export const validateFamilyForm = (members: any[], formFields: any[], options?: 
     formFields.forEach(field => {
       if (field.required) {
         const value = member[field.fieldName];
-        const validation = validateField(field.fieldName, value, field.type, options);
-        
-        if (!validation.isValid) {
-          errors.push(`成员${index + 1}: ${validation.message}`);
+        // 检查字段是否为空
+        if (!value || value.trim() === '') {
+          errors.push(`成员${index + 1}: 请填写${field.fieldName}`);
+        } else {
+          const validation = validateField(field.fieldName, value, field.type, options);
+          
+          if (!validation.isValid) {
+            errors.push(`成员${index + 1}: ${validation.message}`);
+          }
         }
       }
     });
@@ -229,8 +237,8 @@ export const validateFamilyForm = (members: any[], formFields: any[], options?: 
 export const validateTeamForm = (teamData: any, members: any[], formFields: any[], options?: any): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
   
-  // 校验团队基本信息
-  if (!teamData.teamLeader) {
+  // 校验团队基本信息 - 必填字段
+  if (!teamData.teamLeader || teamData.teamLeader.trim() === '') {
     errors.push('请填写团队负责人');
   } else {
     const nameValidation = validateName(teamData.teamLeader);
@@ -239,7 +247,7 @@ export const validateTeamForm = (teamData: any, members: any[], formFields: any[
     }
   }
   
-  if (!teamData.teamLeaderPhone) {
+  if (!teamData.teamLeaderPhone || teamData.teamLeaderPhone.trim() === '') {
     errors.push('请填写负责人电话');
   } else {
     const phoneValidation = validatePhone(teamData.teamLeaderPhone);
@@ -248,24 +256,24 @@ export const validateTeamForm = (teamData: any, members: any[], formFields: any[
     }
   }
   
-  // 校验团队名称
-  if (teamData.teamName) {
+  // 校验团队名称 - 可选字段
+  if (teamData.teamName && teamData.teamName.trim() !== '') {
     const teamNameValidation = validateTeamName(teamData.teamName);
     if (!teamNameValidation.isValid) {
       errors.push(`团队名称: ${teamNameValidation.message}`);
     }
   }
   
-  // 校验联系邮箱
-  if (teamData.contactEmail) {
+  // 校验联系邮箱 - 可选字段
+  if (teamData.contactEmail && teamData.contactEmail.trim() !== '') {
     const emailValidation = validateEmail(teamData.contactEmail);
     if (!emailValidation.isValid) {
       errors.push(`联系邮箱: ${emailValidation.message}`);
     }
   }
   
-  // 校验团队简介
-  if (teamData.teamDescription) {
+  // 校验团队简介 - 可选字段
+  if (teamData.teamDescription && teamData.teamDescription.trim() !== '') {
     const descriptionValidation = validateTeamDescription(teamData.teamDescription);
     if (!descriptionValidation.isValid) {
       errors.push(`团队简介: ${descriptionValidation.message}`);
@@ -277,10 +285,15 @@ export const validateTeamForm = (teamData: any, members: any[], formFields: any[
     formFields.forEach(field => {
       if (field.required) {
         const value = member[field.fieldName];
-        const validation = validateField(field.fieldName, value, field.type, options);
-        
-        if (!validation.isValid) {
-          errors.push(`成员${index + 1}: ${validation.message}`);
+        // 检查字段是否为空
+        if (!value || value.trim() === '') {
+          errors.push(`成员${index + 1}: 请填写${field.fieldName}`);
+        } else {
+          const validation = validateField(field.fieldName, value, field.type, options);
+          
+          if (!validation.isValid) {
+            errors.push(`成员${index + 1}: ${validation.message}`);
+          }
         }
       }
     });

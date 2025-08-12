@@ -1,26 +1,12 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import type { RouteRecordRaw } from 'vue-router'
+
 // 路由配置
 const routes: RouteRecordRaw[] = [
     {
         // 根路径重定向到仪表板
         path: '/',
         redirect: '/dashboard'
-    },   
-     {
-        // 登录页
-        path: '/login',
-        name: 'Login',
-        component: () => import('@/views/txs/Login.vue')
     },
-    
-     {
-        // 找回密码页
-        path: '/resetpwd',
-        name: 'ResetPassword',
-        component: () => import('@/views/txs/ResetPassword.vue')
-    },
-
     {
         // 仪表板/首页
         path: '/dashboard',
@@ -31,11 +17,6 @@ const routes: RouteRecordRaw[] = [
                 path: 'account/system',
                 name: 'SystemAccount',
                 component: () => import('@/views/txs/SystemAccount.vue')
-            },
-            {
-                   path: 'account/quanxian',
-                name: 'Quanxian',
-                component: () => import('@/views/txs/Quanxian.vue')
             },
             {
                 path: 'account/role',
@@ -62,11 +43,11 @@ const routes: RouteRecordRaw[] = [
                 name: 'ActivityManagement',
                 component: () => import('@/views/dcy/ActivityManagement.vue')
             },
-            {
-                path: 'activity/publish-normal',
-                name: 'PublishNormal',
-                component: () => import('@/views/wsj/PublishNormal.vue')
-            },
+            // {
+            //     path: 'activity/publish-normal',
+            //     name: 'PublishNormal',
+            //     component: () => import('@/views/wsj/PublishNormal.vue')
+            // },
             {
                 path: 'activity/publish-event',
                 name: 'PublishEvent',
@@ -96,33 +77,17 @@ const routes: RouteRecordRaw[] = [
                 path: 'tag-test',
                 name: 'TagTest',
                 component: () => import('@/views/TagTest.vue')
-            },
-
-              {
-                path: 'account',
-                name: 'Accounts',
-                component: () => import('@/views/txs/account.vue')
-            },
-
+            }
         ]
     }
 ]
 
-// 创建路由实例 
+// 创建路由实例
 const router = createRouter({
     history: createWebHistory(), // 使用HTML5 History模式
     routes
 })
-router.beforeEach((to, _from, next) => {
-  document.title = to.meta?.title ? `${to.meta.title} - 全民健身运营管理后台` : '全民健身运营管理后台'
-  const publicPages = ['/login', '/resetpwd']
-  const accessToken = localStorage.getItem('accessToken')
-  if (!publicPages.includes(to.path) && !accessToken) {
-    next('/login')
-  } else {
-    next()
-  }
-})
+
 export default router
 
 

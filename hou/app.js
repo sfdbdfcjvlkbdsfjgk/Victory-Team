@@ -8,7 +8,9 @@ var fileUpload = require('express-fileupload');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var wsjRouter = require('./routes/wsj/hd');
-
+var videosRouter = require('./routes/api/videos');
+var uploadRouter = require('./routes/api/upload');
+var chunkUploadRouter = require('./routes/api/chunkUpload');
 var txsRouter=require('./routes/txs')
 var uploadRouter = require('./routes/upload');
 var uploadSimpleRouter = require('./routes/upload-simple'); // 简化上传路由
@@ -37,11 +39,25 @@ app.use(cookieParser());
 app.use(fileUpload({
   createParentPath: true,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 限制文件大小为10MB
+    fileSize: 500 * 1024 * 1024 // 修改为500MB，与视频上传限制一致
   }
 }));
 
-app.use(express.static(path.join(__dirname, 'public')));
+// 静态文件服务配置
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, path, stat) => {
+    if (path.endsWith('.mp4') || path.endsWith('.avi') || path.endsWith('.mov') || path.endsWith('.wmv')) {
+      res.set({
+        'Content-Type': 'video/mp4',
+        'Accept-Ranges': 'bytes',
+        'Cache-Control': 'public, max-age=3600',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+        'Access-Control-Allow-Headers': 'Range, Content-Range'
+      });
+    }
+  }
+}));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
@@ -56,6 +72,9 @@ app.use('/api', apiRouter); // 挂载API路由
 
 // 静态文件服务 - 提供上传的文件访问
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api', videosRouter);
+app.use('/api', uploadRouter);
+app.use('/api', chunkUploadRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

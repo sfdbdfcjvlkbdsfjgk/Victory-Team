@@ -16,17 +16,42 @@ interface PersonalInfo {
   [key: string]: string; // 动态字段
 }
 
+interface RegistrationItem {
+  itemName: string;
+  cost: number;
+  maxPeople: number;
+  requireInsurance: boolean;
+  consultationPhone: string;
+}
+
+interface ActivityData {
+  _id?: string;
+  id?: string;
+  title?: string;
+  name?: string;
+  registrationItems?: RegistrationItem[];
+}
+
 export default function PersonalRegistration() {
   const navigate = useNavigate();
   const { activityId } = useParams<{ activityId: string }>();
   const [searchParams] = useSearchParams();
   const selectedItem = searchParams.get('itemId');
   
+  const [activity, setActivity] = useState<ActivityData | null>(null);
   const [formData, setFormData] = useState<PersonalInfo>({});
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [loading, setLoading] = useState(false);
   const [fieldsLoading, setFieldsLoading] = useState(true);
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
+  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | 'warning' } | null>(null);
+
+  const showMessage = (text: string, type: 'success' | 'error' | 'warning') => {
+    setMessage({ text, type });
+    setTimeout(() => {
+      setMessage(null);
+    }, 3000);
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -92,6 +117,11 @@ export default function PersonalRegistration() {
         
         const fields = data.formFields || [];
         setFormFields(fields);
+        
+        // 设置活动数据
+        setActivity(data);
+        console.log('设置的活动数据:', data);
+        console.log('活动数据中的registrationItems:', data.registrationItems);
         
         // 初始化表单数据，设置性别默认值
         const genderField = fields.find((field: FormField) => field.type === 'gender-restriction');
@@ -241,15 +271,35 @@ export default function PersonalRegistration() {
         }
       });
       
-      const submitData = {
+      // 获取选中项目的cost值并添加到formData中
+      let selectedItemData = activity?.registrationItems?.find((item: RegistrationItem) => item.itemName === selectedItem);
+      
+      // 如果没有找到匹配的项目，使用第一个项目
+      if (!selectedItemData && activity?.registrationItems && activity.registrationItems.length > 0) {
+        selectedItemData = activity.registrationItems[0];
+      }
+      
+      // 将cost字段添加到formData中
+      if (selectedItemData && selectedItemData.cost !== null && selectedItemData.cost !== undefined && selectedItemData.cost !== 0) {
+        processedFormData['报名费'] = selectedItemData.cost.toString();
+        console.log('将cost字段添加到formData:', selectedItemData.cost);
+      }
+      
+      // 构建提交数据
+      const submitData: any = {
         activityId,
         selectedItem,
         formData: processedFormData
       };
       
+      console.log('活动数据:', activity);
+      console.log('选中的项目名称:', selectedItem);
+      console.log('找到的选中项目数据:', selectedItemData);
+      
       console.log('原始表单数据:', formData);
       console.log('处理后的表单数据:', processedFormData);
       console.log('提交的个人报名数据:', submitData);
+      console.log('最终提交的数据结构:', JSON.stringify(submitData, null, 2));
       
       // 提交报名信息
       const response = await axios.post(`http://localhost:3000/wsj/register/individual`, submitData, {
@@ -268,7 +318,7 @@ export default function PersonalRegistration() {
         const maxRegistered = 10; // 这里应该从活动详情获取
         
         if (newCount > maxRegistered) {
-          alert('报名人数已满，无法继续报名！');
+          showMessage('报名人数已满，无法继续报名！', 'error');
           navigate(`/activity-detail/${activityId}`);
           return;
         }
@@ -286,14 +336,14 @@ export default function PersonalRegistration() {
         
         window.dispatchEvent(event);
         
-        alert('报名成功！');
+        showMessage('报名成功！', 'success');
         navigate(`/activity-detail/${activityId}`);
       } else {
-        alert(response.data.msg || '报名失败');
+        showMessage(response.data.msg || '报名失败', 'error');
       }
     } catch (error) {
       console.error('报名失败:', error);
-      alert('报名失败，请稍后重试');
+      showMessage('报名失败，请稍后重试', 'error');
     } finally {
       setLoading(false);
     }
@@ -353,6 +403,21 @@ export default function PersonalRegistration() {
           </div>
         )}
       </div>
+
+      {/* 消息提示 */}
+      {message && (
+        <div style={{
+          backgroundColor: message.type === 'success' ? '#f6ffed' : message.type === 'error' ? '#fff2f0' : '#fff7e6',
+          border: message.type === 'success' ? '1px solid #b7eb8f' : message.type === 'error' ? '1px solid #ffccc7' : '1px solid #ffd591',
+          borderRadius: '6px',
+          padding: '8px 12px',
+          marginBottom: '15px',
+          fontSize: '12px',
+          color: message.type === 'success' ? '#52c41a' : message.type === 'error' ? '#ff4d4f' : '#faad14'
+        }}>
+          {message.text}
+        </div>
+      )}
 
       {/* 表单内容 */}
       {fieldsLoading ? (

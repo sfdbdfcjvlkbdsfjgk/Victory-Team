@@ -11,6 +11,22 @@ interface FormField {
   isSystem: boolean;
 }
 
+interface RegistrationItem {
+  itemName: string;
+  cost: number;
+  maxPeople: number;
+  requireInsurance: boolean;
+  consultationPhone: string;
+}
+
+interface ActivityData {
+  _id?: string;
+  id?: string;
+  title?: string;
+  name?: string;
+  registrationItems?: RegistrationItem[];
+}
+
 interface FamilyMember {
   [key: string]: string; // 动态字段
 }
@@ -25,6 +41,7 @@ export default function FamilyRegistration() {
   const [searchParams] = useSearchParams();
   const selectedItem = searchParams.get('itemId');
   
+  const [activity, setActivity] = useState<ActivityData | null>(null);
   const [formData, setFormData] = useState<FamilyInfo>({
     members: [{}]
   });
@@ -32,6 +49,15 @@ export default function FamilyRegistration() {
   const [loading, setLoading] = useState(false);
   const [fieldsLoading, setFieldsLoading] = useState(true);
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: { [memberIndex: number]: string } }>({});
+  const [maxPeopleMessage, setMaxPeopleMessage] = useState<string>('');
+  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | 'warning' } | null>(null);
+
+  const showMessage = (text: string, type: 'success' | 'error' | 'warning') => {
+    setMessage({ text, type });
+    setTimeout(() => {
+      setMessage(null);
+    }, 3000);
+  };
 
   // 获取表单字段配置
   const fetchFormFields = async () => {
@@ -48,6 +74,11 @@ export default function FamilyRegistration() {
         
         const fields = data.formFields || [];
         setFormFields(fields);
+        
+        // 设置活动数据
+        setActivity(data);
+        console.log('设置的活动数据:', data);
+        console.log('活动数据中的registrationItems:', data.registrationItems);
         
         // 初始化表单数据，设置性别默认值
         const genderField = fields.find((field: FormField) => field.type === 'gender-restriction');
@@ -178,6 +209,28 @@ export default function FamilyRegistration() {
   };
 
   const addMember = () => {
+    // 获取选中项目的最大人数限制
+    let selectedItemData = activity?.registrationItems?.find((item: RegistrationItem) => item.itemName === selectedItem);
+    
+    // 如果没有找到匹配的项目，使用第一个项目
+    if (!selectedItemData && activity?.registrationItems && activity.registrationItems.length > 0) {
+      selectedItemData = activity.registrationItems[0];
+    }
+    
+    // 检查是否超过最大人数限制
+    const maxPeople = selectedItemData?.maxPeople || 10; // 默认10人
+    if (formData.members.length >= maxPeople) {
+      setMaxPeopleMessage(`最多只能添加${maxPeople}个成员`);
+      // 3秒后清除提示信息
+      setTimeout(() => {
+        setMaxPeopleMessage('');
+      }, 3000);
+      return;
+    }
+    
+    // 清除之前的提示信息
+    setMaxPeopleMessage('');
+    
     // 获取当前表单字段中的性别默认值
     const genderField = formFields.find((field: FormField) => field.type === 'gender-restriction');
     const defaultGender = genderField?.hintText || '男';
@@ -214,7 +267,10 @@ export default function FamilyRegistration() {
     const validation = validateFamilyForm(formData.members, formFields);
     
     if (!validation.isValid) {
-      // 将验证错误映射到字段错误状态，不使用弹窗
+      // 显示错误消息给用户
+      showMessage(`表单验证失败: ${validation.errors.join(', ')}`, 'error');
+      
+      // 将验证错误映射到字段错误状态
       const newFieldErrors: { [key: string]: { [memberIndex: number]: string } } = {};
       validation.errors.forEach(error => {
         // 解析错误消息，提取成员索引和字段信息
@@ -249,25 +305,108 @@ export default function FamilyRegistration() {
 
     setLoading(true);
     try {
-      // 准备提交的数据，确保字段名正确
-      const processedMembers = formData.members.map(member => {
-        const processedMember: { [key: string]: string } = {};
-        Object.keys(member).forEach(key => {
-          const value = member[key];
-          if (value !== undefined && value !== null) {
-            processedMember[key] = value;
+      // 额外检查：确保所有必填字段都已填写
+      const emptyRequiredFields: string[] = [];
+      formData.members.forEach((member, memberIndex) => {
+        formFields.forEach(field => {
+          if (field.required) {
+            const value = member[field.fieldName];
+            if (!value || value.trim() === '') {
+              emptyRequiredFields.push(`成员${memberIndex + 1}的${field.fieldName}`);
+            }
           }
         });
+      });
+      
+      if (emptyRequiredFields.length > 0) {
+        showMessage(`请填写以下必填字段: ${emptyRequiredFields.join(', ')}`, 'error');
+        setLoading(false);
+        return;
+      }
+      
+      // 准备提交的数据，确保字段名正确
+      console.log('提交前的formData.members:', formData.members);
+      console.log('当前的formFields:', formFields);
+      
+      const processedMembers = formData.members.map((member, index) => {
+        console.log(`处理成员${index + 1}:`, member);
+        const processedMember: { [key: string]: string } = {};
+        
+        // 使用formFields来确保处理所有字段，而不是只处理member中存在的字段
+        formFields.forEach(field => {
+          const value = member[field.fieldName];
+          console.log(`字段 ${field.fieldName}: 原始值 = "${value}", 类型 = ${typeof value}`);
+          
+          // 字段名映射：将中文字段名映射到英文字段名
+          let mappedFieldName = field.fieldName;
+          if (field.fieldName === '姓名') {
+            mappedFieldName = 'name';
+          } else if (field.fieldName === '手机号') {
+            mappedFieldName = 'phone';
+          } else if (field.fieldName === '证件类型/证件号' || field.fieldName === '身份证') {
+            mappedFieldName = 'idCard';
+          } else if (field.fieldName === '紧急联系人') {
+            mappedFieldName = 'emergencyContact';
+          } else if (field.fieldName === '年龄' || field.fieldName === '年龄限制') {
+            mappedFieldName = 'age';
+          } else if (field.fieldName === '性别' || field.fieldName === '性别限制') {
+            mappedFieldName = 'gender';
+          }
+          
+          console.log(`字段映射: ${field.fieldName} -> ${mappedFieldName}`);
+          
+          // 确保值不为undefined或null
+          const finalValue = value !== undefined && value !== null ? value : '';
+          console.log(`最终值: "${finalValue}"`);
+          
+          // 对于性别字段，直接使用中文值
+          if (field.type === 'gender-restriction') {
+            processedMember[mappedFieldName] = finalValue; // 直接使用中文值：男/女
+          } else {
+            processedMember[mappedFieldName] = finalValue;
+          }
+        });
+        
+        // 确保所有必需字段都存在，即使后端没有返回
+        if (!processedMember.hasOwnProperty('emergencyContact')) {
+          processedMember.emergencyContact = '';
+          console.log('添加默认的emergencyContact字段');
+        }
+        
+        console.log(`处理后的成员${index + 1}:`, processedMember);
         return processedMember;
       });
       
-      const submitData = {
+      // 获取选中项目的cost值
+      let selectedItemData = activity?.registrationItems?.find((item: RegistrationItem) => item.itemName === selectedItem);
+      
+      // 如果没有找到匹配的项目，使用第一个项目
+      if (!selectedItemData && activity?.registrationItems && activity.registrationItems.length > 0) {
+        selectedItemData = activity.registrationItems[0];
+      }
+      
+      // 将cost字段添加到每个成员的formData中
+      if (selectedItemData && selectedItemData.cost !== null && selectedItemData.cost !== undefined && selectedItemData.cost !== 0) {
+        processedMembers.forEach(member => {
+          member['cost'] = selectedItemData.cost.toString(); // 映射为后端期望的字段名
+        });
+        console.log('将cost字段添加到每个成员的formData:', selectedItemData.cost);
+      }
+      
+      // 构建提交数据
+      const submitData: any = {
         activityId,
         selectedItem,
         members: processedMembers
       };
       
+      console.log('活动数据:', activity);
+      console.log('选中的项目名称:', selectedItem);
+      console.log('找到的选中项目数据:', selectedItemData);
+      
       console.log('提交的家庭报名数据:', submitData);
+      console.log('activityId值:', activityId);
+      console.log('最终提交的数据结构:', JSON.stringify(submitData, null, 2));
       
       console.log('开始提交家庭报名数据...');
       const response = await axios.post(`http://localhost:3000/wsj/register/family`, submitData, {
@@ -290,7 +429,7 @@ export default function FamilyRegistration() {
         const maxRegistered = 10; // 这里应该从活动详情获取
         
         if (newCount > maxRegistered) {
-          alert('报名人数已满，无法继续报名！');
+          showMessage('报名人数已满，无法继续报名！', 'error');
           navigate(`/activity-detail/${activityId}`);
           return;
         }
@@ -308,10 +447,10 @@ export default function FamilyRegistration() {
         
         window.dispatchEvent(event);
         
-        alert('家庭报名成功！');
+        showMessage('家庭报名成功！', 'success');
         navigate(`/activity-detail/${activityId}`);
       } else {
-        alert(response.data.msg || response.data.message || '报名失败');
+        showMessage(response.data.msg || response.data.message || '报名失败', 'error');
       }
     } catch (error: any) {
       console.error('报名失败:', error);
@@ -320,13 +459,13 @@ export default function FamilyRegistration() {
       if (error.response) {
         console.log('错误响应:', error.response.data);
         console.log('错误状态:', error.response.status);
-        alert(`报名失败: ${error.response.data?.msg || error.response.data?.message || '网络错误'}`);
+        showMessage(`报名失败: ${error.response.data?.msg || error.response.data?.message || '网络错误'}`, 'error');
       } else if (error.request) {
         console.log('请求错误:', error.request);
-        alert('报名失败: 网络连接错误，请检查网络');
+        showMessage('报名失败: 网络连接错误，请检查网络', 'error');
       } else {
         console.log('其他错误:', error.message);
-        alert('报名失败: 请稍后重试');
+        showMessage('报名失败: 请稍后重试', 'error');
       }
     } finally {
       setLoading(false);
@@ -388,7 +527,20 @@ export default function FamilyRegistration() {
         )}
       </div>
 
-
+      {/* 消息提示 */}
+      {message && (
+        <div style={{
+          backgroundColor: message.type === 'success' ? '#f6ffed' : message.type === 'error' ? '#fff2f0' : '#fff7e6',
+          border: message.type === 'success' ? '1px solid #b7eb8f' : message.type === 'error' ? '1px solid #ffccc7' : '1px solid #ffd591',
+          borderRadius: '6px',
+          padding: '8px 12px',
+          marginBottom: '15px',
+          fontSize: '12px',
+          color: message.type === 'success' ? '#52c41a' : message.type === 'error' ? '#ff4d4f' : '#faad14'
+        }}>
+          {message.text}
+        </div>
+      )}
 
       {/* 家庭成员信息 */}
       <div style={{
@@ -427,6 +579,21 @@ export default function FamilyRegistration() {
             + 添加成员
           </button>
         </div>
+        
+        {/* 最大人数提示信息 */}
+        {maxPeopleMessage && (
+          <div style={{
+            backgroundColor: '#fff2e8',
+            border: '1px solid #ffbb96',
+            borderRadius: '6px',
+            padding: '8px 12px',
+            marginBottom: '15px',
+            fontSize: '12px',
+            color: '#d46b08'
+          }}>
+            {maxPeopleMessage}
+          </div>
+        )}
 
         {fieldsLoading ? (
           <div style={{
@@ -515,7 +682,8 @@ export default function FamilyRegistration() {
                         color: '#666',
                         fontWeight: '500'
                       }}>
-                        {field.fieldName} {field.required && <span style={{ color: 'red' }}>*</span>}
+                        {field.fieldName} {field.required && <span style={{ color: 'red', fontWeight: 'bold' }}>*</span>}
+                        {field.required && <span style={{ fontSize: '10px', color: '#999', marginLeft: '4px' }}>(必填)</span>}
                       </label>
                       
                       {/* 年龄选择器 */}
@@ -574,8 +742,8 @@ export default function FamilyRegistration() {
                                 console.log('时间解析失败:', error);
                               }
                             }
-                            // 如果不是时间格式，显示原有的年龄范围
-                            return `(${minAge}-{maxAge}岁)`;
+                            // 如果不是时间格式，显示年龄范围
+                            return `(${minAge}-${maxAge}岁)`;
                           })()}
                         </span>
                       </div>
@@ -591,7 +759,8 @@ export default function FamilyRegistration() {
                         color: '#666',
                         fontWeight: '500'
                       }}>
-                        {field.fieldName} {field.required && <span style={{ color: 'red' }}>*</span>}
+                        {field.fieldName} {field.required && <span style={{ color: 'red', fontWeight: 'bold' }}>*</span>}
+                        {field.required && <span style={{ fontSize: '10px', color: '#999', marginLeft: '4px' }}>(必填)</span>}
                       </label>
                       <div style={{ display: 'flex', gap: '20px' }}>
                         <label style={{
@@ -604,7 +773,7 @@ export default function FamilyRegistration() {
                         }}>
                           <input
                             type="radio"
-                            name={`gender-${index}`}
+                            name={`${field.fieldName}-${index}`}
                             value="男"
                             checked={member[field.fieldName] === '男'}
                             onChange={(e) => handleMemberChange(index, field.fieldName, e.target.value)}
@@ -628,7 +797,7 @@ export default function FamilyRegistration() {
                         }}>
                           <input
                             type="radio"
-                            name={`gender-${index}`}
+                            name={`${field.fieldName}-${index}`}
                             value="女"
                             checked={member[field.fieldName] === '女'}
                             onChange={(e) => handleMemberChange(index, field.fieldName, e.target.value)}
@@ -656,7 +825,8 @@ export default function FamilyRegistration() {
                         color: '#666',
                         fontWeight: '500'
                       }}>
-                        {field.fieldName} {field.required && <span style={{ color: 'red' }}>*</span>}
+                        {field.fieldName} {field.required && <span style={{ color: 'red', fontWeight: 'bold' }}>*</span>}
+                        {field.required && <span style={{ fontSize: '10px', color: '#999', marginLeft: '4px' }}>(必填)</span>}
                       </label>
                       <input
                         type={field.type}

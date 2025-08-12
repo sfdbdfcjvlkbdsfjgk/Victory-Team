@@ -27,7 +27,7 @@ interface ActivityData {
   description?: string;
   sportT?: string;
   sportTag?: string; // 运动标签
-  state?: number; // 活动状态：0-不显示，1-显示
+  state?: String; // 活动状态：待发布-不显示，已发布-显示
   categories?: Array<{
     id: string;
     name: string;
@@ -240,14 +240,7 @@ export default function Sou() {
         >
           ← 返回
         </button>
-        <p style={{ 
-          margin: 0, 
-          fontSize: '18px', 
-          color: '#333',
-          fontWeight: '500'
-        }}>
-          活动赛事列表
-        </p>
+        <p style={{ margin: 0, fontSize: '18px', color: '#333',fontWeight: '500'}}>活动赛事列表</p>
       </div>
 
       {/* 活动列表 */}
@@ -258,7 +251,7 @@ export default function Sou() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {activities.filter(activity => activity.state === 1).map((activity, index) => (
+            {activities.filter(activity => activity.state === "已发布").map((activity, index) => (
               <div
                 key={activity._id || activity.id || index}
                 style={{ 
@@ -279,12 +272,7 @@ export default function Sou() {
                 }}
                 onClick={() => handleCardClick(activity)}
               >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '16px',
-                  gap: '16px'
-                }}>
+                <div style={{ display: 'flex',alignItems: 'center', padding: '16px', gap: '16px'}}>
                   {/* 左侧图片 */}
                   <div style={{
                     width: '120px',

@@ -199,11 +199,11 @@
         </el-form-item>
         
         <!-- 操作按钮 -->
-        <!-- <el-form-item>
+        <el-form-item>
           <el-button @click="saveDraft">存草稿</el-button>
           <el-button type="primary" @click="publishRegistration">发布</el-button>
           <el-button @click="goBack">返回</el-button>
-        </el-form-item> -->
+        </el-form-item>
       </el-form>
     </div>
   </div>
@@ -212,6 +212,7 @@
 <script setup lang="ts">
 import { ref, reactive, watch, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { registrationAPI, handleAPIError } from '../../api'
 
 const formRef = ref()
 
@@ -338,10 +339,30 @@ const removeFormField = (index: number) => {
   }
 }
 
+// 保存草稿
+const saveDraft = () => {
+  registrationAPI.saveDraft(registrationForm).then(() => {
+    ElMessage.success('草稿保存成功！')
+  }).catch((error) => {
+    handleAPIError(error)
+  })
+}
 
-
-
-
+// 发布报名
+const publishRegistration = () => {
+  formRef.value.validate((valid: boolean) => {
+    if (valid) {
+      registrationAPI.publishRegistration(registrationForm).then(() => {
+        ElMessage.success('发布成功！')
+        resetForm()
+      }).catch((error) => {
+        handleAPIError(error)
+      })
+    } else {
+      ElMessage.error('请完善必填信息')
+    }
+  })
+}
 
 // 返回
 const goBack = () => {
@@ -361,10 +382,47 @@ const resetForm = () => {
   ]
 }
 
+// 初始化地区数据
+const initRegionData = async () => {
+  try {
+    const provincesResponse = await registrationAPI.getProvinces()
+    provinces.value = provincesResponse.data || provinces.value
+  } catch (error) {
+    console.error('获取省份数据失败:', error)
+  }
+}
 
+// 监听省份变化，更新城市列表
+watch(() => registrationForm.province, async (newProvince) => {
+  if (newProvince) {
+    try {
+      const citiesResponse = await registrationAPI.getCities(newProvince)
+      cities.value = citiesResponse.data || []
+      registrationForm.city = ''
+      registrationForm.district = ''
+    } catch (error) {
+      console.error('获取城市数据失败:', error)
+    }
+  }
+})
 
+// 监听城市变化，更新区县列表
+watch(() => registrationForm.city, async (newCity) => {
+  if (newCity) {
+    try {
+      const districtsResponse = await registrationAPI.getDistricts(newCity)
+      districts.value = districtsResponse.data || []
+      registrationForm.district = ''
+    } catch (error) {
+      console.error('获取区县数据失败:', error)
+    }
+  }
+})
 
-
+// 初始化
+onMounted(() => {
+  initRegionData()
+})
 </script>
 
 <style scoped>

@@ -2,7 +2,6 @@
   "hash": "5f8e4bba",
   "configHash": "89ebcb66",
   "lockfileHash": "e86ae450",
-<<<<<<< HEAD
   "browserHash": "06bda965",
   "optimized": {
     "react/jsx-dev-runtime": {
@@ -38,9 +37,4 @@
       "file": "chunk-WYQRYOQT.js"
     }
   }
-=======
-  "browserHash": "179513b0",
-  "optimized": {},
-  "chunks": {}
->>>>>>> origin/fjl
 }
