@@ -306,17 +306,8 @@ let RolePermission = new mongoose.Schema({
   permissionId: {          // 权限ID
     type: String,
     required: true
-// const mongoose = require('mongoose')
-
-// // 数据库连接
-// mongoose.connect('mongodb+srv://yy2935140484:439952014710q@cluster0.kuvzpp4.mongodb.net/sport')
-//   .then(() => {
-//     console.log('数据库连接成功')
-//   })
-//   .catch(err => {
-//     console.log('数据库连接失败', err)
-//   })
-
+  },
+});
 // Banner模型 - 扩展为多用途内容模型
 const bannerSchema = new mongoose.Schema({
   // 所属运营位/内容类型
@@ -526,7 +517,7 @@ const activitySchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     } // 创建时间
-
+  });
 
 
 const activityEvent = mongoose.model('activityEvent', activitySchema, 'activityEvent')
@@ -583,8 +574,7 @@ let YonghuUserModel = mongoose.model("User_yonghu", YonghuUser, "User_yonghu");
 
 // 创建登录注册专用模型
 let UserModel = mongoose.model("User", User, "User");
-  }
-})
+
 
 const Notification = mongoose.model('Notification', notificationSchema)
 

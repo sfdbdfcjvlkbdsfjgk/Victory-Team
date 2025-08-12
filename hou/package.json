@@ -22,6 +22,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
     "morgan": "~1.9.1",
+    "multer": "^2.0.2",
     "multiparty": "^4.2.3",
     "node-cron": "^4.2.1",
     "node-xlsx": "^0.24.0",
